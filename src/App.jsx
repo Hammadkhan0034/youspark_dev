@@ -7,7 +7,7 @@ import TermsAndConditions from './pages/TermsAndConditions';
 import Home from './pages/Home';
 import Login from './pages/authPages/Login';
 import UserProfile from './pages/UserProfile';
-import Signup from './pages/authPages/SignUp';
+import Signup from './pages/authPages/Signup';
 import VirtualCard from './components/VirtualCard';
 
 function App() {

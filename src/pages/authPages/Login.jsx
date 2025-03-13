@@ -1,9 +1,15 @@
 
 // import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 
 const Login = () => {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -21,6 +27,16 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try{
+      await axios.post("http://localhost:4000/api/sign-in", formData);
+
+      dispatch(setUser(res.data.user));
+
+
+
+    }catch(error){
+      console.log("Error ", error)
+    }
   }
 
   const homepage = () => {
