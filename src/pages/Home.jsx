@@ -21,7 +21,7 @@ const Home = () => {
       case "home":
         return <p>Welcome to the Home Page!</p>;
       case "virtualCard":
-        return <VirtualCard user={userData} />;
+        return <p>Own Virtual Card Component</p>;
       case "ownVirtualCard":
         return <p>Own Virtual Card Component</p>;
       case "expAndSp":

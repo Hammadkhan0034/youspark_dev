@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Topbar from "../components/Topbar"
 
 const TermsAndConditions = () => {
   return (
+    <>
+    <Topbar />
     <div className="p-4 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-left">
       <h1 className="text-3xl font-bold mb-6 text-teal-600 dark:text-teal-400">
         Terms and Conditions
@@ -90,6 +93,7 @@ const TermsAndConditions = () => {
       <p className="font-bold text-teal-600 dark:text-teal-400">YouSparks Technologies Inc.</p>
       <p>support@yousparks.com</p>
     </div>
+    </>
   );
 };
 

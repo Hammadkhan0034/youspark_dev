@@ -1,11 +1,12 @@
 import React from "react";
+import YSLOGO from "../assets/YSLOGO.png"
 
 const Topbar = () => {
   return (
     <nav className="w-full flex justify-between items-center z-50 px-6 py-4 bg-teal-600 text-white shadow-md">
       {/* Left Section - Logo */}
       <div className="text-2xl font-bold">
-        YouSparks
+        <img src={YSLOGO}  style={{width:"45px", height:"40px"}}/>
       </div>
 
       {/* Right Section - Navigation Links with Vertical Lines */}
