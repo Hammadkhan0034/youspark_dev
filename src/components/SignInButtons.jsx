@@ -14,7 +14,7 @@ import SignInEmailButton from "./authButtons/SignInEmailButton";
 export default function SignInButtons() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}> 
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen w-[145%]">
         <div className="flex flex-col space-y-3 bg-gray-100 p-4 rounded-lg shadow-lg w-96">
           <h1 className="text-2xl font-bold text-black mb-0">Welcome to YouSparks</h1>
           <p className="text-gray-600 text-sm mb-6">Sign in using any platform below</p>

@@ -4,7 +4,9 @@ import { FaSearch } from "react-icons/fa";
 
 const RightBar = () => {
   return (
-    <div className="flex flex-col w-full h-full items-start p-4 bg-white shadow-md h-screen">
+    <div className=" w-[100%]flex flex-col w-full h-full items-start p-4 bg-white shadow-md h-screen">
+    {/* <div className="w-[25%] flex flex-col h-screen p-4 text-black space-y-4 border-r-2 border-gray-200"> */}
+
       {/* Search Bar */}
       <div className="relative mb-4">
         <input

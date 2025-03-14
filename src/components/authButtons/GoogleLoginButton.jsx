@@ -25,12 +25,28 @@ const GoogleLoginButton = () => {
             "Content-Type": "application/json",
           },
         });
+
+        console.log("API Response:", res.data); 
+
+        const accessToken = res.data.data.access_token;
+
+// Store in localStorage
+localStorage.setItem("access_token", accessToken);
+
+console.log("Token Saved:", accessToken);
       
         // Store user data in Redux
         dispatch(setUser(res.data.user));
-      
-        // Navigate to home page
-        navigate("/");
+
+
+ // Navigate based on profile_completed
+ if (res.data.data.profile_completed === false) {
+  navigate("/user-profile");
+} else {
+  navigate("/");
+}
+
+        
       } catch (error) {
         console.error("Error sending token to backend:", error);
       }}})

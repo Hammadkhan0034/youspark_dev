@@ -18,7 +18,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path="/signin-socials" element={<SignInSocials />} />
-        <Route path='user-profile' element={<UserProfile />} />
+        <Route path='/user-profile' element={<UserProfile />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />

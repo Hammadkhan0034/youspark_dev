@@ -7,7 +7,7 @@ import { CiCircleMore } from "react-icons/ci";
 
 const Sidebar = ({ setActiveComponent }) => {
   return (
-    <div className="flex flex-col w-full h-full p-4 h-screen text-black space-y-4 border-r-2 border-gray-200">
+    <div className=" w-[100%] flex flex-col w-full h-full p-4 h-screen text-black space-y-4 border-r-2 border-gray-200">
       <span className="text-2xl font-bold">YouSpark</span>
 
       <div className="flex items-center space-x-3 p-2 rounded-lg cursor-pointer hover:bg-gray-300" 
