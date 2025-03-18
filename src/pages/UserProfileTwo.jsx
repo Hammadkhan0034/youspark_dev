@@ -5,7 +5,7 @@ import API from "../api/api";
 import userBG from "../../src/assets/userBG.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../redux/userSlice";
-import Sidebar from "../components/SidebarTwo"
+import Sidebar from "../components/SidebarTwo";
 
 const MultiStepForm = () => {
   const { user } = useSelector((state) => state.user);
@@ -28,6 +28,19 @@ const MultiStepForm = () => {
   const [regions, setRegions] = useState([]);
   const [cities, setCities] = useState([]);
 
+  // Load data from local storage when component mounts
+  useEffect(() => {
+    const savedFormData = localStorage.getItem("formData");
+    if (savedFormData) {
+      setFormData(JSON.parse(savedFormData));
+    }
+  }, []);
+
+  // Save data to local storage whenever formData changes
+  useEffect(() => {
+    localStorage.setItem("formData", JSON.stringify(formData));
+  }, [formData]);
+
   useEffect(() => {
     axios.get("https://restcountries.com/v3.1/all").then((response) => {
       const countryData = response.data.map((country) => ({
@@ -39,12 +52,14 @@ const MultiStepForm = () => {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const newFormData = { ...formData, [e.target.name]: e.target.value };
+    setFormData(newFormData);
   };
 
   const handleCountryChange = async (e) => {
     const countryName = e.target.value;
-    setFormData({ ...formData, country: countryName, region: "", city: "" });
+    const newFormData = { ...formData, country: countryName, region: "", city: "" };
+    setFormData(newFormData);
     const response = await axios.post("https://countriesnow.space/api/v0.1/countries/states", { country: countryName });
     setRegions(response.data.data.states || []);
     setCities([]);
@@ -52,7 +67,8 @@ const MultiStepForm = () => {
 
   const handleRegionChange = async (e) => {
     const regionName = e.target.value;
-    setFormData({ ...formData, region: regionName, city: "" });
+    const newFormData = { ...formData, region: regionName, city: "" };
+    setFormData(newFormData);
     const response = await axios.post("https://countriesnow.space/api/v0.1/countries/state/cities", {
       country: formData.country,
       state: regionName,
@@ -82,10 +98,6 @@ const MultiStepForm = () => {
     <div
       className="relative w-full min-h-screen bg-cover bg-center bg-blue-300 flex items-center justify-center"
       style={{
-        // backgroundImage: `url(${userBG})`,
-        // backgroundSize: "cover",
-        // backgroundPosition: "center",
-        // backgroundRepeat: "no-repeat",
         width: "100vw",
         height: "100vh",
         opacity: "0.9"
@@ -137,11 +149,9 @@ const MultiStepForm = () => {
               </div>
             </div>
           )}
-         {step === 3 && (
+          {step === 3 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Gender</h2>
-
-              {/* Gender Dropdown */}
               <div className="mb-6">
                 <select
                   value={formData.gender || ""}
@@ -154,22 +164,9 @@ const MultiStepForm = () => {
                   <option value="Non-Binary">Non-Binary</option>
                 </select>
               </div>
-
-              {/* Navigation Buttons */}
               <div className="flex justify-between mt-6">
-                <button
-                  onClick={handleBack}
-                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={() => setStep(4)}
-                  className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600"
-                  disabled={!formData.gender} // Prevent proceeding without selection
-                >
-                  Next
-                </button>
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={() => setStep(4)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600" disabled={!formData.gender}>Next</button>
               </div>
             </div>
           )}

@@ -36,7 +36,7 @@ const GoogleLoginButton = () => {
         console.log("Token Saved:", accessToken);
 
         // Store user data in Redux
-        dispatch(setUser(res.data.user)); // ✅ Correct way
+        dispatch(setUser(res.data.user)); 
 
         console.log("Response data of user in GoogleLogin Page", res.data.user);
 
