@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import './App.css';
 import SignInSocials from './pages/authPages/SignInSocials';
 import ChatPage from './pages/ChatPage';
@@ -16,7 +16,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path='/' element={<Home />} />
+
+      <Route path="/" element={<Navigate to="/signin-socials" replace />} />
+
+        <Route path='/home' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path="/signin-socials" element={<SignInSocials />} />

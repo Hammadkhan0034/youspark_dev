@@ -61,7 +61,7 @@ const Login = () => {
        if (response.data.data.profile_completed === false) {
         navigate("/user-profile");
       } else {
-        navigate("/");
+        navigate("/home");
       }
 
     
