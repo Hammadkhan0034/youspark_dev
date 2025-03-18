@@ -7,6 +7,8 @@ import TermsAndConditions from './pages/TermsAndConditions';
 import Home from './pages/Home';
 import Login from './pages/authPages/Login';
 import UserProfile from './pages/UserProfile';
+import UserProfileTwo from './pages/UserProfileTwo';
+
 import Signup from './pages/authPages/Signup';
 import VirtualCard from './components/VirtualCard';
 
@@ -18,7 +20,8 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path="/signin-socials" element={<SignInSocials />} />
-        <Route path='/user-profile' element={<UserProfile />} />
+        {/* <Route path='/user-profile' element={<UserProfile />} /> */}
+        <Route path='/user-profile' element={<UserProfileTwo />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />

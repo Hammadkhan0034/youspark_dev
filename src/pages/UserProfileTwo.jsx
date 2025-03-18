@@ -1,0 +1,218 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import API from "../api/api";
+import userBG from "../../src/assets/userBG.jpg";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProfile } from "../redux/userSlice";
+import Sidebar from "../components/SidebarTwo"
+
+const MultiStepForm = () => {
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
+    nickname: user?.nickname || "",
+    birth_date: "",
+    gender: "",
+    country: "",
+    region: "",
+    city: ""
+  });
+
+  const [countries, setCountries] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    axios.get("https://restcountries.com/v3.1/all").then((response) => {
+      const countryData = response.data.map((country) => ({
+        name: country.name.common,
+        code: country.cca2,
+      }));
+      setCountries(countryData);
+    });
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCountryChange = async (e) => {
+    const countryName = e.target.value;
+    setFormData({ ...formData, country: countryName, region: "", city: "" });
+    const response = await axios.post("https://countriesnow.space/api/v0.1/countries/states", { country: countryName });
+    setRegions(response.data.data.states || []);
+    setCities([]);
+  };
+
+  const handleRegionChange = async (e) => {
+    const regionName = e.target.value;
+    setFormData({ ...formData, region: regionName, city: "" });
+    const response = await axios.post("https://countriesnow.space/api/v0.1/countries/state/cities", {
+      country: formData.country,
+      state: regionName,
+    });
+    setCities(response.data.data || []);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await API.put("/users/update-profile", formData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+      });
+      dispatch(updateUserProfile(formData));
+      navigate("/");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
+  return (
+    <div
+      className="relative w-full min-h-screen bg-cover bg-center bg-blue-300 flex items-center justify-center"
+      style={{
+        // backgroundImage: `url(${userBG})`,
+        // backgroundSize: "cover",
+        // backgroundPosition: "center",
+        // backgroundRepeat: "no-repeat",
+        width: "100vw",
+        height: "100vh",
+        opacity: "0.9"
+      }}
+    >
+      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%", height: "50%" }}>
+        <Sidebar step={step} />
+        <div className="p-8 flex-1">
+          {step === 1 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
+              <input
+                type="text"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                placeholder="First Name"
+                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
+              />
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="Last Name"
+                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
+              />
+              <input
+                type="text"
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
+                placeholder="Nickname"
+                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+              <div className="flex justify-between mt-6">
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={() => setStep(2)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+              </div>
+            </div>
+          )}
+          {step === 2 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Birthday</h2>
+              <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" />
+              <div className="flex justify-between mt-6">
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={() => setStep(3)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+              </div>
+            </div>
+          )}
+         {step === 3 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Gender</h2>
+
+              {/* Gender Dropdown */}
+              <div className="mb-6">
+                <select
+                  value={formData.gender || ""}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
+                >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-Binary">Non-Binary</option>
+                </select>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between mt-6">
+                <button
+                  onClick={handleBack}
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep(4)}
+                  className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600"
+                  disabled={!formData.gender} // Prevent proceeding without selection
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+          {step === 4 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Location</h2>
+              <select name="country" value={formData.country} onChange={handleCountryChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4">
+                <option value="">Select Country</option>
+                {countries.map((c) => (<option key={c.code} value={c.name}>{c.name}</option>))}
+              </select>
+              <select name="region" value={formData.region} onChange={handleRegionChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4" disabled={!regions.length}>
+                <option value="">Select Region</option>
+                {regions.map((r, i) => (<option key={i} value={r.name}>{r.name}</option>))}
+              </select>
+              <select name="city" value={formData.city} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" disabled={!cities.length}>
+                <option value="">Select City</option>
+                {cities.map((c, i) => (<option key={i} value={c}>{c}</option>))}
+              </select>
+              <div className="flex justify-between mt-6">
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={() => setStep(5)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+              </div>
+            </div>
+          )}
+          {step === 5 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
+              <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
+              <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p>
+              <p className="mb-4"><strong>Nickname:</strong> {formData.nickname}</p>
+              <p className="mb-4"><strong>Birth Date:</strong> {formData.birth_date}</p>
+              <p className="mb-4"><strong>Gender:</strong> {formData.gender}</p>
+              <p className="mb-6"><strong>Location:</strong> {formData.city}, {formData.region}, {formData.country}</p>
+              <div className="flex justify-between">
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={handleSubmit} className="bg-green-500 text-white p-2 rounded-lg w-24 hover:bg-green-600">Submit</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MultiStepForm;

@@ -28,12 +28,12 @@ const UserProfile = () => {
 
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
-  const [cities, setCities] = useState([]); 
+  const [cities, setCities] = useState([]);
   const [userData, setUserData] = useState(null);
   // const [user, setUser] = useState(); 
 
   const [errors, setErrors] = useState({});
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Fetch all countries when component loads
@@ -52,14 +52,14 @@ const UserProfile = () => {
   // Handle country change & fetch regions
   const handleCountryChange = async (e) => {
     const countryName = e.target.value;
-    setFormData({ ...formData, country: countryName, region: "", city: "" }); 
+    setFormData({ ...formData, country: countryName, region: "", city: "" });
 
     try {
       const response = await axios.post("https://countriesnow.space/api/v0.1/countries/states", {
         country: countryName
       });
       setRegions(response.data.data.states || []);
-      setCities([]); 
+      setCities([]);
     } catch (error) {
       console.error("Error fetching regions:", error);
     }
@@ -103,11 +103,11 @@ const UserProfile = () => {
 
     try {
       const token = localStorage.getItem("access_token");
-if (!token) {
-  alert("No access token found, Please Login first")
-  console.error("No access token found! Redirecting to login...");
- 
-}
+      if (!token) {
+        alert("No access token found, Please Login first")
+        console.error("No access token found! Redirecting to login...");
+
+      }
       const res = await API.put("/users/update-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -119,10 +119,10 @@ if (!token) {
 
 
       dispatch(updateUserProfile(formData))
-      .unwrap()
-      .then(() => {
-        navigate("/");
-      })
+        .unwrap()
+        .then(() => {
+          navigate("/");
+        })
 
       console.log("Form Data in UserProfile Page", formData)
       // setUserData(formData);
@@ -133,152 +133,152 @@ if (!token) {
   };
 
   return (
-<>
+    <>
 
-<div
+      <div
         className="relative w-[145%] bg-cover h-screen"
         style={{
           backgroundImage: `url(${userBG})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          opacity:"0.8"
+          opacity: "0.8"
         }}
       >
 
 
-    
-    {/* <div className="flex justify-center items-center min-h-screen p-7" > */}
-    <div className="absolute inset-0 flex justify-center items-center">
-      <div className="bg-white p-10 py-20 ml-12 mb-28 rounded-2xl h-[650px] shadow-2xl w-full max-w-2xl">
 
-      <div className="bg-teal-600 py-4 w-full text-center mb-4 rounded-md">
-  <h2 className="text-2xl font-extrabold text-white">
-    User Profile
-  </h2>
-</div>
+        {/* <div className="flex justify-center items-center min-h-screen p-7" > */}
+        <div className="absolute inset-0 flex justify-center items-center">
+          <div className="bg-white p-10 py-20 ml-12 mb-28 rounded-2xl h-[650px] shadow-2xl w-full max-w-2xl">
+
+            <div className="bg-teal-600 py-4 w-full text-center mb-4 rounded-md">
+              <h2 className="text-2xl font-extrabold text-white">
+                User Profile
+              </h2>
+            </div>
 
 
 
-        {/* <h2 className="text-2xl font-extrabold text-center text-teal-800 mb-8">User Profile</h2> */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-2 gap-8 mb-4">
-            <input
-              type="text"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              placeholder="First Name"
-              className="w-full p-4 py-6 h-10 border rounded-lg "
-            />
-            <input
-              type="text"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              placeholder="Last Name"
-              className="w-full p-4 py-6 h-9 border rounded-lg"
-            />
+            {/* <h2 className="text-2xl font-extrabold text-center text-teal-800 mb-8">User Profile</h2> */}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-2 gap-8 mb-4">
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  placeholder="First Name"
+                  className="w-full p-4 py-6 h-10 border rounded-lg "
+                />
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="w-full p-4 py-6 h-9 border rounded-lg"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 mb-4">
+                <input
+                  type="text"
+                  name="nickname"
+                  value={formData.nickname}
+                  onChange={handleChange}
+                  placeholder="Nickname"
+                  className="w-full p-4 py-6 h-9 border rounded-lg "
+                />
+                <select
+                  className="w-full border  rounded-lg"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                >
+                  <option value="">Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 mb-4">
+                {/* Country Dropdown */}
+                <select
+                  className="w-full border p-2 rounded-lg"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleCountryChange}
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country) => (
+                    <option key={country.code} value={country.name}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Region Dropdown */}
+                <select
+                  className="w-full border p-2 rounded-lg"
+                  name="region"
+                  value={formData.region}
+                  onChange={handleRegionChange}
+                  disabled={!regions.length}
+                >
+                  <option value="">Select Region</option>
+                  {regions.map((region, index) => (
+                    <option key={index} value={region.name}>
+                      {region.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City Dropdown */}
+              <div className="grid grid-cols-2 gap-8 mb-4">
+                <select
+                  className="w-full border p-2 rounded-lg"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  disabled={!cities.length}
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city, index) => (
+                    <option key={index} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="Location"
+                  className="w-full p-4 py-6 h-9 border rounded-lg"
+                />
+              </div>
+
+              <input
+                type="date"
+                name="birth_date"
+                value={formData.birth_date}
+                onChange={handleChange}
+                className="w-full p-4 py-6 h-9 border rounded-lg"
+              />
+
+              <button className="w-full bg-indigo-500 text-white font-extrabold p-2 rounded-lg">
+                Update Profile
+              </button>
+            </form>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 mb-4">
-            <input
-              type="text"
-              name="nickname"
-              value={formData.nickname}
-              onChange={handleChange}
-              placeholder="Nickname"
-              className="w-full p-4 py-6 h-9 border rounded-lg "
-            />
-            <select
-              className="w-full border  rounded-lg"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-            >
-              <option value="">Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 mb-4">
-            {/* Country Dropdown */}
-            <select
-              className="w-full border p-2 rounded-lg"
-              name="country"
-              value={formData.country}
-              onChange={handleCountryChange}
-            >
-              <option value="">Select Country</option>
-              {countries.map((country) => (
-                <option key={country.code} value={country.name}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Region Dropdown */}
-            <select
-              className="w-full border p-2 rounded-lg"
-              name="region"
-              value={formData.region}
-              onChange={handleRegionChange}
-              disabled={!regions.length}
-            >
-              <option value="">Select Region</option>
-              {regions.map((region, index) => (
-                <option key={index} value={region.name}>
-                  {region.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* City Dropdown */}
-          <div className="grid grid-cols-2 gap-8 mb-4">
-            <select
-              className="w-full border p-2 rounded-lg"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              disabled={!cities.length}
-            >
-              <option value="">Select City</option>
-              {cities.map((city, index) => (
-                <option key={index} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Location"
-              className="w-full p-4 py-6 h-9 border rounded-lg"
-            />
-          </div>
-
-          <input
-            type="date"
-            name="birth_date"
-            value={formData.birth_date}
-            onChange={handleChange}
-            className="w-full p-4 py-6 h-9 border rounded-lg"
-          />
-
-          <button className="w-full bg-indigo-500 text-white font-extrabold p-2 rounded-lg">
-            Update Profile
-          </button>
-        </form>
+          {userData && <ImageCard userData={userData} />}
+        </div>
       </div>
-
-      {userData && <ImageCard userData={userData} />}
-    </div>
-    </div>
     </>
   );
 };

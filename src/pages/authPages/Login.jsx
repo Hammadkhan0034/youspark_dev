@@ -35,6 +35,7 @@ const Login = () => {
       // Store access and refresh tokens in local storage
       localStorage.setItem("access_token", userData.access_token);
       localStorage.setItem("refresh_token", userData.refresh_token);
+      
 
       // Dispatch user details to Redux store
       dispatch(
