@@ -51,8 +51,8 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         console.log("Updated User Profile in UserSlice action:", action.payload);
-        state.user = action.payload.data;
-        // state.user = action.payload;
+        // state.user = action.payload.data;
+        state.user = action.payload;
 
         state.isAuthenticated = true;
         state.loading = false;

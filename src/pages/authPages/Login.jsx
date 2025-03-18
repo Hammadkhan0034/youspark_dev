@@ -56,9 +56,14 @@ const Login = () => {
       );
 
       console.log("Login Successful:", userData);
+       // Navigate based on profile_completed
+       if (response.data.data.profile_completed === false) {
+        navigate("/user-profile");
+      } else {
+        navigate("/");
+      }
 
-      // Navigate to home page after successful login
-      navigate("/");
+    
     } catch (error) {
       console.error("Login error:", error);
       setError(error.response?.data?.message || "Invalid credentials");
@@ -100,7 +105,7 @@ const Login = () => {
           <div>
             <input
               type="password"
-              name="password"
+              name="password" 
               value={formData.password}
               onChange={handleChange}
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"

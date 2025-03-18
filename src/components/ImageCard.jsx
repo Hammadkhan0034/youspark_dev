@@ -2,25 +2,38 @@ import { useSelector } from "react-redux";
 
 const ImageCard = () => {
   const userData = useSelector((state) => state.user.user);
-  console.log("UserData in Image card", userData);
+  console.log("UserData in Image Card:", userData);
 
   if (!userData || !userData.data) return null;
 
-  const { first_name, last_name, nickname, city, country, gender } = userData.data;
-  console.log("userData in Image Card", userData.data)
+  // Extract user details safely from userData.data
+  const { 
+    first_name, 
+    last_name, 
+    nickname, 
+    email, 
+    city, 
+    country, 
+    gender, 
+    user_name, 
+    birth_date, 
+    region 
+  } = userData.data;
 
   const userInfo = [
-    { label: "Full Name", value: `${first_name} ${last_name}` },
+    { label: "Full Name", value: first_name && last_name ? `${first_name} ${last_name}` : "N/A" },
     { label: "Nickname", value: nickname || "N/A" },
+    { label: "Email", value: email || "N/A" },
+    { label: "Username", value: user_name || "N/A" },
     { label: "City", value: city || "N/A" },
+    { label: "Region", value: region || "N/A" },
     { label: "Country", value: country || "N/A" },
     { label: "Gender", value: gender || "N/A" },
+    { label: "Birth Date", value: birth_date || "N/A" },
   ];
 
   return (
-    <div
-      className="w-96  min-h-[1000px] p-6 bg-black bg-opacity-60 backdrop-blur-lg shadow-2xl rounded-2xl border border-gray-300 text-white relative z-10"
-    >
+    <div className="w-[100%] h-auto p-6 bg-black bg-opacity-60 backdrop-blur-lg shadow-2xl rounded-2xl border border-gray-300 text-white">
       {/* Profile Image */}
       <div className="flex justify-center mb-4">
         <img
@@ -31,12 +44,13 @@ const ImageCard = () => {
       </div>
 
       {/* Profile Title */}
-      <h2 className="text-2xl font-bold text-center mb-4">{first_name}'s Profile</h2>
+      <h2 className="text-xl font-bold text-center mb-2">{first_name || "User"}'s Profile</h2>
+      <p className="text-center text-gray-300">@{user_name || "N/A"}</p>
 
       {/* User Info */}
-      <div className="space-y-3">
+      <div className="mt-4 space-y-2">
         {userInfo.map((item, index) => (
-          <div key={index} className="flex justify-between border-b border-gray-400 pb-2">
+          <div key={index} className="flex justify-between border-b border-gray-400 pb-2 text-sm">
             <span className="font-semibold">{item.label}:</span>
             <span>{item.value}</span>
           </div>
@@ -47,13 +61,6 @@ const ImageCard = () => {
 };
 
 export default ImageCard;
-
-
-
-
-
-
-
 
 
 
