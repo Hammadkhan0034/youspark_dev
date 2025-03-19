@@ -38,7 +38,7 @@ const Home = () => {
   return (
     <>
       <Topbar />
-      <div className="flex h-screen w-[145%]">
+      <div className="flex h-screen w-[100%]">
         <div className="flex-[3]">
           <Sidebar setActiveComponent={setActiveComponent} />
         </div>

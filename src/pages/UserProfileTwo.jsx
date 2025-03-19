@@ -21,7 +21,8 @@ const MultiStepForm = () => {
     gender: "",
     country: "",
     region: "",
-    city: ""
+    city: "",
+    location: '',
   });
 
   const [countries, setCountries] = useState([]);
@@ -78,11 +79,13 @@ const MultiStepForm = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log("Form data Before api call", formData)
       await API.put("/users/update-profile", formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
       });
+      console.log("Formdata after Api call", formData);
       dispatch(updateUserProfile(formData));
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -185,6 +188,15 @@ const MultiStepForm = () => {
                 <option value="">Select City</option>
                 {cities.map((c, i) => (<option key={i} value={c}>{c}</option>))}
               </select>
+
+              <input className="border-2 border-blue-200 p-3 mt-4 w-full rounded-lg focus:border-blue-500 focus:outline-none"
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Location"
+              />
+
               <div className="flex justify-between mt-6">
                 <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
                 <button onClick={() => setStep(5)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
@@ -192,7 +204,7 @@ const MultiStepForm = () => {
             </div>
           )}
           {step === 5 && (
-            <div>
+            <div className="space-y-4">
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
               <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
               <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p>
