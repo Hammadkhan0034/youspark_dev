@@ -192,7 +192,7 @@ const MultiStepForm = () => {
             </div>
           )}
           {step === 5 && (
-            <div>
+            <div className="space-y-4">
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
               <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
               <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p>
