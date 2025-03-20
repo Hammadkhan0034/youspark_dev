@@ -19,7 +19,7 @@ const VirtualCard = () => {
   };
 
   return (
-    <div className=" w-[145%] flex justify-center  min-h-screen bg-gray-900 text-white p-8">
+    <div className="flex justify-center  min-h-screen bg-gray-900 text-white p-8">
       {/* 3D Rotating Card with ImageCard component */}
       <div
         className="w-96  mt-10 bg-gradient-to-br  shadow-2xl rounded-2xl flex justify-center items-center transition-transform duration-300 ease-out transform"

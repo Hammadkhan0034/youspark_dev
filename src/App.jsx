@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import Login from './pages/authPages/Login';
 import UserProfile from './pages/UserProfile';
 import UserProfileTwo from './pages/UserProfileTwo';
-
 import Signup from './pages/authPages/Signup';
 import VirtualCard from './components/VirtualCard';
 

@@ -37,7 +37,7 @@ const ImageCard = () => {
 
   return (
     <div
-     className="relative w-[400px] h-[600px] bg-cover bg-center rounded-lg shadow-2xl overflow-hidden border-4 border-yellow-400 transform transition-transform hover:scale-105"
+     className="relative w-[300px] h-[400px] bg-cover bg-center rounded-lg shadow-2xl overflow-hidden border-4 border-yellow-400 transform transition-transform hover:scale-105"
       style={{
         backgroundImage: `url(${pok2})`,
       }}
