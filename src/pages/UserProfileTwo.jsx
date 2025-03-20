@@ -14,8 +14,6 @@ const MultiStepForm = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    first_name: user?.first_name || "",
-    last_name: user?.last_name || "",
     nickname: user?.nickname || "",
     birth_date: "",
     gender: "",
@@ -106,28 +104,13 @@ const MultiStepForm = () => {
         opacity: "0.9"
       }}
     >
-      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%", height: "50%" }}>
+      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%"}}>
         <Sidebar step={step} />
         <div className="p-8 flex-1">
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
-              <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="First Name"
-                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
-              />
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Last Name"
-                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
-              />
+              
               <input
                 type="text"
                 name="nickname"

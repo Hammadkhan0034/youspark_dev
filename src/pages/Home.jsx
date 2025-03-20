@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import Sidebar from "../components/Sidebar"
-import { Home as HomeIcon, Search, MessageCircle, User, Settings, Bell, TrendingUp, MoreHorizontal, Heart, Repeat2, MessageSquare, Share, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Home as HomeIcon, Search, Bell, MessageCircle, User, Settings, MoreHorizontal, Heart, Repeat2, MessageSquare, Share } from 'lucide-react';
+import Sidebar from "../components/Sidebar";
+import RightSidebar from "../components/Rightbar";
+import Topbar from "../components/Topbar";
 
 const tweets = [
   {
@@ -36,118 +39,148 @@ const trendingTopics = [
 
 function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const toggleMobileNav = () => {
+    setIsMobileNavOpen(!isMobileNavOpen);
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
-   
-<Sidebar isSidebarOpen={isSidebarOpen} />
+    <div className="min-h-screen bg-white">
+      {/* Topbar */}
+      <Topbar toggleMobileNav={toggleMobileNav} />
 
-      {/* Main Content */}
-      <main className={`${isSidebarOpen ? 'ml-64' : 'ml-16'} flex-1 mr-80 border-r border-gray-800 transition-all duration-300 ease-in-out`}>
-        <div className="p-4 border-b border-gray-800">
-          <h1 className="text-xl font-bold">Home</h1>
-        </div>
-        <div className="p-4">
-          {/* Tweet Input */}
-          <div className="flex space-x-4 pb-8 border-b border-gray-800">
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop"
-              alt="Profile"
-              className="w-12 h-12 rounded-full"
-            />
-            <div className="flex-1">
-              <textarea
-                placeholder="What's happening?"
-                className="w-full bg-transparent border-b border-gray-800 focus:outline-none focus:border-blue-500 resize-none pb-4"
-                rows={3}
-              />
-              <div className="flex justify-end mt-2">
-                <button className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-full font-bold">
-                  Post
-                </button>
-              </div>
-            </div>
+      {/* Mobile Navigation */}
+      {isMobileNavOpen && (
+        <div className="fixed inset-0 bg-white z-50 lg:hidden">
+          <div className="p-4 flex justify-between items-center border-b border-gray-200">
+            <h2 className="text-xl font-bold">Menu</h2>
+            <button onClick={toggleMobileNav} className="text-gray-700">
+              <Settings size={24} />
+            </button>
           </div>
+          <nav className="p-4 space-y-4">
+            <MobileNavItem icon={<HomeIcon size={24} />} text="Home" onClick={() => navigate("/home")} />
+            <MobileNavItem icon={<Search size={24} />} text="Discover" onClick={() => navigate("/discover")} />
+            <MobileNavItem icon={<User size={24} />} text="SparkZone" onClick={() => navigate("/sparkzone")} />
+            <MobileNavItem icon={<Bell size={24} />} text="Notifications" onClick={() => navigate("/notifications")} />
+            <MobileNavItem icon={<MessageCircle size={24} />} text="Messages" onClick={() => navigate("/messages")} />
+            <MobileNavItem icon={<Settings size={24} />} text="Settings" onClick={() => navigate("/settings")} />
+          </nav>
+        </div>
+      )}
 
-          {/* Tweets */}
-          {tweets.map(tweet => (
-            <div key={tweet.id} className="py-4 border-b border-gray-800">
-              <div className="flex space-x-4">
-                <img src={tweet.avatar} alt={tweet.username} className="w-12 h-12 rounded-full" />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold">{tweet.username}</span>
-                    <span className="text-gray-500">{tweet.handle}</span>
-                    <span className="text-gray-500">· {tweet.timestamp}</span>
-                    <button className="ml-auto text-gray-500 hover:text-gray-400">
-                      <MoreHorizontal size={20} />
-                    </button>
-                  </div>
-                  <p className="mt-2 mb-4">{tweet.content}</p>
-                  <div className="flex justify-between text-gray-500 max-w-md">
-                    <button className="flex items-center space-x-2 hover:text-blue-500">
-                      <MessageSquare size={18} />
-                      <span>{tweet.comments}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:text-green-500">
-                      <Repeat2 size={18} />
-                      <span>{tweet.retweets}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:text-red-500">
-                      <Heart size={18} />
-                      <span>{tweet.likes}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 hover:text-blue-500">
-                      <Share size={18} />
-                    </button>
-                  </div>
+      <div className="flex">
+        {/* Left Sidebar */}
+        <Sidebar isSidebarOpen={isSidebarOpen} />
+
+        {/* Main Content */}
+        <main className={`
+          flex-1 min-h-screen
+          lg:ml-64
+          ${isSidebarOpen ? 'lg:mr-80' : 'lg:mr-80'}
+          pt-16 lg:pt-0
+          pb-16 lg:pb-0
+          transition-all duration-300 ease-in-out
+        `}>
+          <div className="max-w-2xl mx-auto px-4">
+            {/* Tweet Input */}
+            <div className="flex space-x-4 py-4 border-b border-gray-200">
+              <img
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop"
+                alt="Profile"
+                className="w-12 h-12 rounded-full"
+              />
+              <div className="flex-1">
+                <textarea
+                  placeholder="What's happening?"
+                  className="w-full bg-transparent border-b border-gray-200 focus:outline-none focus:border-blue-500 resize-none pb-4"
+                  rows={3}
+                />
+                <div className="flex justify-end mt-2">
+                  <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-bold transition-colors">
+                    Post
+                  </button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </main>
 
-      {/* Right Sidebar */}
-      <aside className="w-80 p-4 fixed right-0 h-screen">
-        {/* Search Bar */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full bg-gray-900 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
-        </div>
-
-        {/* Trending Topics */}
-        <div className="mt-4 bg-gray-900 rounded-xl p-4">
-          <h2 className="text-xl font-bold mb-4">Trending</h2>
-          {trendingTopics.map((topic, index) => (
-            <div key={index} className="py-3 hover:bg-gray-800 cursor-pointer rounded-lg px-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold">{topic.topic}</p>
-                  <p className="text-sm text-gray-500">{topic.tweets} Tweets</p>
+            {/* Tweets */}
+            {tweets.map(tweet => (
+              <div key={tweet.id} className="py-4 border-b border-gray-200">
+                <div className="flex space-x-4">
+                  <img src={tweet.avatar} alt={tweet.username} className="w-12 h-12 rounded-full" />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-bold">{tweet.username}</span>
+                      <span className="text-gray-500">{tweet.handle}</span>
+                      <span className="text-gray-500">· {tweet.timestamp}</span>
+                      <button className="ml-auto text-gray-500 hover:text-gray-700">
+                        <MoreHorizontal size={20} />
+                      </button>
+                    </div>
+                    <p className="mt-2 mb-4">{tweet.content}</p>
+                    <div className="flex justify-between text-gray-500 max-w-md">
+                      <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                        <MessageSquare size={18} />
+                        <span>{tweet.comments}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
+                        <Repeat2 size={18} />
+                        <span>{tweet.retweets}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
+                        <Heart size={18} />
+                        <span>{tweet.likes}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                        <Share size={18} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <TrendingUp size={18} className="text-gray-500" />
               </div>
-            </div>
-          ))}
-        </div>
-      </aside>
+            ))}
+          </div>
+        </main>
+
+        {/* Right Sidebar */}
+        <RightSidebar trendingTopics={trendingTopics} />
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2">
+          <div className="flex justify-between items-center">
+            <MobileNavButton icon={<HomeIcon size={24} />} onClick={() => navigate("/home")} />
+            <MobileNavButton icon={<Search size={24} />} onClick={() => navigate("/discover")} />
+            <MobileNavButton icon={<Bell size={24} />} onClick={() => navigate("/notifications")} />
+            <MobileNavButton icon={<MessageCircle size={24} />} onClick={() => navigate("/messages")} />
+          </div>
+        </nav>
+      </div>
     </div>
   );
 }
 
-function SidebarItem({ icon, text, active = false, onClick }) {
+function MobileNavItem({ icon, text, onClick }) {
   return (
     <button
-      className={`flex items-center space-x-4 p-3 rounded-full hover:bg-gray-900 w-full ${active ? 'font-bold' : ''}`}
+      className="flex items-center space-x-4 w-full p-4 hover:bg-gray-100 rounded-lg transition-colors"
       onClick={onClick}
     >
       {icon}
-      <span>{text}</span>
+      <span className="font-medium">{text}</span>
+    </button>
+  );
+}
+
+function MobileNavButton({ icon, onClick }) {
+  return (
+    <button
+      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+      onClick={onClick}
+    >
+      {icon}
     </button>
   );
 }

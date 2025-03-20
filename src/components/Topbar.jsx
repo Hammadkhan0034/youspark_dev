@@ -1,34 +1,17 @@
-import React from "react";
-import YSLOGO from "../assets/YSLOGO.png";
-import Logout from "../components/Logout";
+import React from 'react';
+import { Menu } from 'lucide-react';
 
-const Topbar = () => {
+const Topbar = ({ toggleMobileNav }) => {
   return (
-    <nav className="w-[145%] mx-auto flex justify-between items-center z-50 px-6 py-4 bg-teal-600 text-white shadow-md">
-      {/* Left Section - Logo */}
-      <div className="text-2xl font-bold ml-8">
-        <img src={YSLOGO} alt="YS Logo" style={{ width: "45px", height: "40px" }} />
+    <header className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+      <div className="flex items-center justify-between p-4">
+        <button onClick={toggleMobileNav} className="text-gray-700">
+          <Menu size={24} />
+        </button>
+        <h1 className="text-xl font-bold">YouSpark</h1>
+        <div className="w-6" /> {/* Spacer for alignment */}
       </div>
-
-      {/* Right Section - Navigation Links with Vertical Lines */}
-      <div className="flex space-x-4 text-lg mr-8 items-center">
-        <a href="/" className="hover:underline">
-          Home
-        </a>
-        <span className="text-white">|</span>
-        <a href="/about" className="hover:underline">
-          About Us
-        </a>
-        <span className="text-white">|</span>
-        <a href="/contact" className="hover:underline">
-          Contact
-        </a>
-        <span className="text-white">|</span>
-
-        {/* Replace the Logout link with the Logout component */}
-        <Logout />
-      </div>
-    </nav>
+    </header>
   );
 };
 
