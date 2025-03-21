@@ -11,11 +11,6 @@ import UserProfileTwo from './pages/UserProfileTwo';
 import Signup from './pages/authPages/Signup';
 import VirtualCard from './components/VirtualCard';
 
-import LineCallback from "../src/components/authButtons/LineCallback"
-
-
-
-
 function App() {
   return (
     <Router>
@@ -26,11 +21,6 @@ function App() {
         <Route path='/home' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
-
-
-        <Route path="/auth/line/callback" element={<LineCallback />} />
-
-
         <Route path="/signin-socials" element={<SignInSocials />} />
         {/* <Route path='/user-profile' element={<UserProfile />} /> */}
         <Route path='/user-profile' element={<UserProfileTwo />} />

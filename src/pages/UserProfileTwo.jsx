@@ -16,6 +16,8 @@ const MultiStepForm = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    first_name: "", // Add first name
+    last_name: "",  // Add last name
     nickname: user?.nickname || "",
     birth_date: "",
     gender: "",
@@ -24,6 +26,7 @@ const MultiStepForm = () => {
     city: "",
     location: '',
   });
+
 
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -80,16 +83,17 @@ const MultiStepForm = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log("Form data Before api call", formData)
-      await API.put("/users/update-profile", formData, {
+      console.log("Form data Before API call", formData);
+      const response = await API.put("/users/update-profile", formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
       });
-      console.log("Formdata after Api call", formData);
+      console.log("API Response:", response);
       dispatch(updateUserProfile(formData));
       navigate("/home");
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error.response ? error.response.data : error);
     }
+
   };
 
   const handleImageChange = (e) => {
@@ -165,6 +169,23 @@ const MultiStepForm = () => {
 
               <input
                 type="text"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                placeholder="First Name"
+                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="Last Name"
+                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+
+              <input
+                type="text"
                 name="nickname"
                 value={formData.nickname}
                 onChange={handleChange}
@@ -173,7 +194,7 @@ const MultiStepForm = () => {
               />
               <div className="flex justify-between mt-6">
                 <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(2)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+                <button onClick={() => setStep(3)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
               </div>
             </div>
           )}
@@ -183,7 +204,7 @@ const MultiStepForm = () => {
               <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" />
               <div className="flex justify-between mt-6">
                 <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(3)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+                <button onClick={() => setStep(4)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
               </div>
             </div>
           )}
@@ -204,7 +225,7 @@ const MultiStepForm = () => {
               </div>
               <div className="flex justify-between mt-6">
                 <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(4)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600" disabled={!formData.gender}>Next</button>
+                <button onClick={() => setStep(5)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600" disabled={!formData.gender}>Next</button>
               </div>
             </div>
           )}
@@ -234,7 +255,7 @@ const MultiStepForm = () => {
 
               <div className="flex justify-between mt-6">
                 <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(5)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+                <button onClick={() => setStep(6)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
               </div>
             </div>
           )}
