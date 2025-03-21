@@ -4,7 +4,6 @@ import { Home as HomeIcon, Search, Bell, MessageCircle, User, Settings, MoreHori
 import Sidebar from "../components/Sidebar";
 import RightSidebar from "../components/Rightbar";
 import Topbar from "../components/Topbar";
-
 const tweets = [
   {
     id: 1,

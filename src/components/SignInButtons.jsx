@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import GoogleLoginButton from "./authButtons/GoogleLoginButton"; 
+import GoogleLoginButton from "./authButtons/GoogleLoginButton";
 import FacebookLoginButton from "./authButtons/FacebookLoginButton";
 import LineLoginButton from "./authButtons/LineLoginButton";
 import AppleLoginButton from "./authButtons/AppleLoginButton";
@@ -9,16 +9,14 @@ import TwitterLoginButton from "./authButtons/TwitterLoginButton";
 import DiscordLoginButton from "./authButtons/DiscordLoginButton";
 import SignInEmailButton from "./authButtons/SignInEmailButton";
 
-
-
 export default function SignInButtons() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}> 
-      <div className=" flex justify-center items-center h-screen">
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}>
+      <div className="flex justify-center items-center h-screen">
         <div className="flex flex-col space-y-3 bg-gray-100 p-4 rounded-lg shadow-lg w-96">
           <h1 className="text-2xl font-bold text-black mb-0">Welcome to YouSparks</h1>
           <p className="text-gray-600 text-sm mb-6">Sign in using any platform below</p>
-          <SignInEmailButton />
+          {/* <SignInEmailButton /> */}
           <GoogleLoginButton />
           <FacebookLoginButton />
           <LineLoginButton />

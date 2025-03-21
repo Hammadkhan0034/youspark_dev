@@ -2,11 +2,12 @@ import React from "react";
 
 const Sidebar = ({ step }) => {
   const steps = [
-    { number: 1, name: "Name" },
-    { number: 2, name: "Birthday" },
-    { number: 3, name: "Gender" },
-    { number: 4, name: "Location" },
-    { number: 5, name: "Summary" }
+    {number: 1, name: "Profile Image"},
+    { number: 2, name: "Name" },
+    { number: 3, name: "Birthday" },
+    { number: 4, name: "Gender" },
+    { number: 5, name: "Location" },
+    { number: 6, name: "Summary" }
   ];
 
   return (

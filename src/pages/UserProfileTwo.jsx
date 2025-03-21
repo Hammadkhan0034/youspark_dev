@@ -6,6 +6,8 @@ import userBG from "../../src/assets/userBG.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../redux/userSlice";
 import Sidebar from "../components/SidebarTwo";
+import DefaultImg from "../assets/default.png"
+
 
 const MultiStepForm = () => {
   const { user } = useSelector((state) => state.user);
@@ -26,6 +28,7 @@ const MultiStepForm = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [cities, setCities] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
 
   // Load data from local storage when component mounts
   useEffect(() => {
@@ -89,6 +92,17 @@ const MultiStepForm = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
@@ -104,13 +118,51 @@ const MultiStepForm = () => {
         opacity: "0.9"
       }}
     >
-      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%"}}>
+      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%" }}>
         <Sidebar step={step} />
         <div className="p-8 flex-1">
           {step === 1 && (
             <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800">Profile Image</h2>
+
+              <div className="relative w-32 h-32 mx-auto mb-6">
+                {/* Image Container */}
+                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-blue-200">
+                  <img
+                    src={profileImage || DefaultImg} // Default image path
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Pencil Icon */}
+                <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                </label>
+
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  id="profileImage"
+                  name="profileImage"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between mt-6">
+                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
+                <button onClick={() => setStep(2)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+              </div>
+            </div>
+          )}
+          {step === 2 && (
+            <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
-              
+
               <input
                 type="text"
                 name="nickname"
@@ -125,7 +177,7 @@ const MultiStepForm = () => {
               </div>
             </div>
           )}
-          {step === 2 && (
+          {step === 3 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Birthday</h2>
               <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" />
@@ -135,7 +187,7 @@ const MultiStepForm = () => {
               </div>
             </div>
           )}
-          {step === 3 && (
+          {step === 4 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Gender</h2>
               <div className="mb-6">
@@ -156,7 +208,7 @@ const MultiStepForm = () => {
               </div>
             </div>
           )}
-          {step === 4 && (
+          {step === 5 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Location</h2>
               <select name="country" value={formData.country} onChange={handleCountryChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4">
@@ -186,7 +238,7 @@ const MultiStepForm = () => {
               </div>
             </div>
           )}
-          {step === 5 && (
+          {step === 6 && (
             <div className="space-y-4">
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
               <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>

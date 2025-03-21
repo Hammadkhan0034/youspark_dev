@@ -74,7 +74,7 @@ const Login = () => {
   return (
     <>
     <div
-                className="relative w-[143%] bg-cover h-screen"
+                className="relative w-[100%] bg-cover h-screen"
                 style={{
                   backgroundImage: `url(${loginImg})`,
                   backgroundSize: "cover",
@@ -84,7 +84,7 @@ const Login = () => {
                 }}
               >
     <div className="absloute inset-0 flex justify-center items-center ">
-      <div className="w-full h-[430px] mt-52 max-w-md bg-slate-300 p-8 rounded-lg shadow-lg">
+      <div className="w-full h-[430px] mt-20 max-w-md bg-slate-300 p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-center text-teal-800 mb-8">
           Login
         </h2>
