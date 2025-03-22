@@ -11,6 +11,7 @@ const Logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("formData");
+    localStorage.removeItem("twitter_code_verifier");
 
     // Dispatch the logoutUser action to update Redux state
     dispatch(logoutUser());

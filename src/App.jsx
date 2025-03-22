@@ -11,6 +11,9 @@ import UserProfileTwo from './pages/UserProfileTwo';
 import Signup from './pages/authPages/Signup';
 import VirtualCard from './components/VirtualCard';
 import DiscordCallback from './components/authButtons/DiscordCallback';
+import TwitterCallback from './components/authButtons/TwitterCallback';
+
+
 
 function App() {
   return (
@@ -31,7 +34,7 @@ function App() {
         <Route path='/virtual-card' element={<VirtualCard />}/>
         {/* Discord OAuth2 callback route */}
         <Route path="/auth/discord/callback" element={<DiscordCallback />} />
-        
+        <Route path="/auth/twitter/callback" element={<TwitterCallback />} />
         {/* Fallback route for unknown paths (404 Not Found) */}
         <Route path="*" element={<div>404 Not Found</div>} />
 
