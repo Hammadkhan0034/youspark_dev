@@ -1,26 +1,69 @@
 import { useEffect } from "react";
-import axios from "axios";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/userSlice";
+import API from "../../api/api";
 
 export default function DiscordCallback() {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code");
+    const handleCallback = async () => {
+      const hash = window.location.hash;
+      
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
 
-    if (code) {
-      axios
-        .post("http://localhost:5000/auth/discord/callback", { code }) // Replace with your backend URL
-        .then((response) => {
-          // Handle the response (e.g., store the token, redirect to dashboard)
-          console.log(response.data);
-          history.push("/dashboard");
-        })
-        .catch((error) => {
-          console.error("Error during Discord authentication:", error);
-        });
-    }
-  }, [history]);
+        if (accessToken) {
+          try {
+            // Send token to your backend
+            const response = await API.post("/social-sign-in", {
+              access_token: accessToken,
+              channel: "discord",
+            });
 
-  return <div>Loading...</div>;
+            const { data } = response.data;
+
+            // Store tokens
+            localStorage.setItem("access_token", data.access_token);
+            if (data.refresh_token) {
+              localStorage.setItem("refresh_token", data.refresh_token);
+            }
+
+            // Update Redux store
+            dispatch(setUser(response.data.user));
+
+            // Clear the hash from URL
+            window.history.replaceState(null, null, window.location.pathname);
+
+            // Navigate based on profile completion
+            if (!data.profile_completed) {
+              navigate("/user-profile");
+            } else {
+              navigate("/home");
+            }
+          } catch (error) {
+            console.error("Error during Discord authentication:", error);
+            navigate("/signin-socials"); // Redirect to login page on error
+          }
+        } else {
+          console.error("No access token found in URL hash");
+          navigate("/signin-socials");
+        }
+      } else {
+        console.error("No hash found in URL");
+        navigate("/signin-socials");
+      }
+    };
+
+    handleCallback();
+  }, [navigate, dispatch]);
+
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  );
 }
