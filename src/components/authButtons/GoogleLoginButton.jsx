@@ -1,7 +1,7 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { FcGoogle } from "react-icons/fc";
 import { useDispatch } from "react-redux";
-import { setUser, updateUserProfile } from "../../redux/userSlice";
+import { setUser } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -11,8 +11,6 @@ const GoogleLoginButton = () => {
 
   const login = useGoogleLogin({
     onSuccess: async (response) => {
-      console.log("Google Login Success:", response);
-
       try {
         const res = await axios.post(
           "http://localhost:4000/api/social-sign-in",
@@ -27,38 +25,37 @@ const GoogleLoginButton = () => {
           }
         );
 
-        console.log("API Response:", res.data);
-
-        const accessToken = res.data.data.access_token;
-
-        // Store in localStorage
-        localStorage.setItem("access_token", accessToken);
-        console.log("Token Saved:", accessToken);
+        const { data } = res.data;
+        
+        // Store access token
+        localStorage.setItem("access_token", data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem("refresh_token", data.refresh_token);
+        }
 
         // Store user data in Redux
-        dispatch(setUser(res.data.user)); 
+        dispatch(setUser(data.user));
 
-        console.log("Response data of user in GoogleLogin Page", res.data.user);
-
-        // Navigate based on profile_completed
-        if (res.data.data.profile_completed === false) {
-          navigate("/user-profile");
-        } else {
-          navigate("/");
-        }
+        // Always navigate to profile page first
+        navigate("/user-profile");
+        
       } catch (error) {
-        console.error("Error sending token to backend:", error);
+        console.error("Error during Google authentication:", error);
+        // Handle error (show error message to user)
       }
+    },
+    onError: (error) => {
+      console.error("Google Login Error:", error);
     },
   });
 
   return (
     <button
       onClick={() => login()}
-      className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg w-full"
+      className="flex items-center justify-center gap-2 w-full py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
     >
-      <FcGoogle className="w-5 h-5 mr-2" />
-      Continue with Google
+      <FcGoogle className="text-2xl" />
+      <span>Continue with Google</span>
     </button>
   );
 };

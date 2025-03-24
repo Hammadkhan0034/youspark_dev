@@ -5,22 +5,27 @@ export default function TwitterLoginButton() {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
     const redirectUri = encodeURIComponent("http://localhost:3000/auth/twitter/callback");
     const scope = encodeURIComponent("tweet.read users.read offline.access");
-    const state = encodeURIComponent(crypto.randomUUID()); // Generate random state
+    const state = crypto.randomUUID(); // Generate random state
     const codeChallengeMethod = "S256";
     
-    // Generate code verifier and challenge
+    // Generate code verifier (43-128 chars)
     const generateCodeVerifier = () => {
-      const array = new Uint8Array(32);
-      crypto.getRandomValues(array);
-      return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      const length = 96;
+      let result = '';
+      const randomValues = new Uint8Array(length);
+      crypto.getRandomValues(randomValues);
+      randomValues.forEach(v => result += chars[v % chars.length]);
+      return result;
     };
 
     const codeVerifier = generateCodeVerifier();
     
-    // Store code verifier in localStorage (needed for callback)
+    // Store code verifier and state in localStorage
     localStorage.setItem("twitter_code_verifier", codeVerifier);
+    localStorage.setItem("twitter_state", state);
 
-    // Generate code challenge
+    // Generate code challenge using SHA-256
     const generateCodeChallenge = async (verifier) => {
       const encoder = new TextEncoder();
       const data = encoder.encode(verifier);

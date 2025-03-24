@@ -18,7 +18,6 @@ export default function DiscordCallback() {
 
         if (accessToken) {
           try {
-            // Send token to your backend
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
               channel: "discord",
@@ -33,20 +32,17 @@ export default function DiscordCallback() {
             }
 
             // Update Redux store
-            dispatch(setUser(response.data.user));
+            dispatch(setUser(data.user));
 
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Navigate based on profile completion
-            if (!data.profile_completed) {
-              navigate("/user-profile");
-            } else {
-              navigate("/home");
-            }
+            // Always redirect to profile page first
+            navigate("/user-profile");
+            
           } catch (error) {
             console.error("Error during Discord authentication:", error);
-            navigate("/signin-socials"); // Redirect to login page on error
+            navigate("/signin-socials");
           }
         } else {
           console.error("No access token found in URL hash");

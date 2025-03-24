@@ -16,8 +16,8 @@ const MultiStepForm = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    first_name: "", // Add first name
-    last_name: "",  // Add last name
+    // first_name: "", // Add first name
+    // last_name: "",  // Add last name
     nickname: user?.nickname || "",
     birth_date: "",
     gender: "",
@@ -81,19 +81,32 @@ const MultiStepForm = () => {
     setCities(response.data.data || []);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
     try {
-      console.log("Form data Before API call", formData);
-      const response = await API.put("/users/update-profile", formData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-      });
-      console.log("API Response:", response);
-      dispatch(updateUserProfile(formData));
-      navigate("/home");
-    } catch (error) {
-      console.error("Error updating profile:", error.response ? error.response.data : error);
-    }
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        navigate("/signin-socials");
+        return;
+      }
 
+      const result = await dispatch(updateUserProfile({
+        ...formData,
+        profile_completed: true
+      })).unwrap();
+
+      // Show success message or handle the success case
+      if (result.data) {
+        // Don't remove formData here
+        // Only navigate to home
+        navigate("/home");
+      }
+
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      // Handle error (show error message to user)
+    }
   };
 
   const handleImageChange = (e) => {
@@ -112,6 +125,13 @@ const MultiStepForm = () => {
       setStep(step - 1);
     }
   };
+
+  // Add success message component
+  const SuccessMessage = () => (
+    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg">
+      Profile updated successfully!
+    </div>
+  );
 
   return (
     <div
@@ -167,7 +187,7 @@ const MultiStepForm = () => {
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
 
-              <input
+              {/* <input
                 type="text"
                 name="first_name"
                 value={formData.first_name}
@@ -182,7 +202,7 @@ const MultiStepForm = () => {
                 onChange={handleChange}
                 placeholder="Last Name"
                 className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
-              />
+              /> */}
 
               <input
                 type="text"
@@ -262,8 +282,8 @@ const MultiStepForm = () => {
           {step === 6 && (
             <div className="space-y-4">
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
-              <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
-              <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p>
+              {/* <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
+              <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p> */}
               <p className="mb-4"><strong>Nickname:</strong> {formData.nickname}</p>
               <p className="mb-4"><strong>Birth Date:</strong> {formData.birth_date}</p>
               <p className="mb-4"><strong>Gender:</strong> {formData.gender}</p>

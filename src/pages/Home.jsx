@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Home as HomeIcon, Search, Bell, MessageCircle, User, Settings, MoreHorizontal, Heart, Repeat2, MessageSquare, Share } from 'lucide-react';
 import Sidebar from "../components/Sidebar";
 import RightSidebar from "../components/Rightbar";
 import Topbar from "../components/Topbar";
+
 const tweets = [
   {
     id: 1,
@@ -37,6 +39,7 @@ const trendingTopics = [
 ];
 
 function Home() {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const navigate = useNavigate();
@@ -54,18 +57,18 @@ function Home() {
       {isMobileNavOpen && (
         <div className="fixed inset-0 bg-white z-50 lg:hidden">
           <div className="p-4 flex justify-between items-center border-b border-gray-200">
-            <h2 className="text-xl font-bold">Menu</h2>
+            <h2 className="text-xl font-bold">{t('menu')}</h2>
             <button onClick={toggleMobileNav} className="text-gray-700">
               <Settings size={24} />
             </button>
           </div>
           <nav className="p-4 space-y-4">
-            <MobileNavItem icon={<HomeIcon size={24} />} text="Home" onClick={() => navigate("/home")} />
-            <MobileNavItem icon={<Search size={24} />} text="Discover" onClick={() => navigate("/discover")} />
-            <MobileNavItem icon={<User size={24} />} text="SparkZone" onClick={() => navigate("/sparkzone")} />
-            <MobileNavItem icon={<Bell size={24} />} text="Notifications" onClick={() => navigate("/notifications")} />
-            <MobileNavItem icon={<MessageCircle size={24} />} text="Messages" onClick={() => navigate("/messages")} />
-            <MobileNavItem icon={<Settings size={24} />} text="Settings" onClick={() => navigate("/settings")} />
+            <MobileNavItem icon={<HomeIcon size={24} />} text={t('home')} onClick={() => navigate("/home")} />
+            <MobileNavItem icon={<Search size={24} />} text={t('discover')} onClick={() => navigate("/discover")} />
+            <MobileNavItem icon={<User size={24} />} text={t('sparkZone')} onClick={() => navigate("/sparkzone")} />
+            <MobileNavItem icon={<Bell size={24} />} text={t('notifications')} onClick={() => navigate("/notifications")} />
+            <MobileNavItem icon={<MessageCircle size={24} />} text={t('messages')} onClick={() => navigate("/messages")} />
+            <MobileNavItem icon={<Settings size={24} />} text={t('settings')} onClick={() => navigate("/settings")} />
           </nav>
         </div>
       )}
@@ -93,13 +96,13 @@ function Home() {
               />
               <div className="flex-1">
                 <textarea
-                  placeholder="What's happening?"
+                  placeholder={t('whatsHappening')}
                   className="w-full bg-transparent border-b border-gray-200 focus:outline-none focus:border-blue-500 resize-none pb-4"
                   rows={3}
                 />
                 <div className="flex justify-end mt-2">
                   <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-bold transition-colors">
-                    Post
+                    {t('post')}
                   </button>
                 </div>
               </div>
@@ -123,18 +126,19 @@ function Home() {
                     <div className="flex justify-between text-gray-500 max-w-md">
                       <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
                         <MessageSquare size={18} />
-                        <span>{tweet.comments}</span>
+                        <span>{tweet.comments} {t('comment')}</span>
                       </button>
                       <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
                         <Repeat2 size={18} />
-                        <span>{tweet.retweets}</span>
+                        <span>{tweet.retweets} {t('retweet')}</span>
                       </button>
                       <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
                         <Heart size={18} />
-                        <span>{tweet.likes}</span>
+                        <span>{tweet.likes} {t('like')}</span>
                       </button>
                       <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
                         <Share size={18} />
+                        <span>{t('share')}</span>
                       </button>
                     </div>
                   </div>
@@ -151,6 +155,7 @@ function Home() {
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2">
           <div className="flex justify-between items-center">
             <MobileNavButton icon={<HomeIcon size={24} />} onClick={() => navigate("/home")} />
+            <MobileNavButton icon={<User size={24} />} text="SparkZone" onClick={() => navigate("/sparkzone")}/>
             <MobileNavButton icon={<Search size={24} />} onClick={() => navigate("/discover")} />
             <MobileNavButton icon={<Bell size={24} />} onClick={() => navigate("/notifications")} />
             <MobileNavButton icon={<MessageCircle size={24} />} onClick={() => navigate("/messages")} />

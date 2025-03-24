@@ -8,7 +8,7 @@ const ImageCard = () => {
 
   // Retrieve form data from local storage when the component mounts
   useEffect(() => {
-    const savedFormData = localStorage.getItem("formData");
+    const savedFormData = localStorage.getItem("user");
     if (savedFormData) {
       setLocalFormData(JSON.parse(savedFormData));
     }

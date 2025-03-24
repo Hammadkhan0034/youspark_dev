@@ -1,0 +1,11 @@
+{
+    "home": {
+      "whatsHappening": "What's happening?",
+      "post": "Post",
+      "tweets": {
+        "comments": "Comments",
+        "retweets": "Retweets",
+        "likes": "Likes"
+      }
+    }
+  }
