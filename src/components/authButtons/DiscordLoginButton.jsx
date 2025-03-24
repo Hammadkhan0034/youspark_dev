@@ -3,7 +3,7 @@ import { FaDiscord } from "react-icons/fa";
 export default function DiscordLoginButton() {
   const handleDiscordLogin = () => {
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    const redirectUri = encodeURIComponent("http://localhost:3000/auth/discord/callback");
+    const redirectUri = encodeURIComponent("http://34.236.113.112/auth/discord/callback");
     const scope = encodeURIComponent("identify email");
     const responseType = "token";
 
