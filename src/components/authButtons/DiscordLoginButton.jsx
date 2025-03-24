@@ -1,9 +1,9 @@
 import { FaDiscord } from "react-icons/fa";
-
+import { BASE_URL } from "../../config/urls";
 export default function DiscordLoginButton() {
   const handleDiscordLogin = () => {
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    const redirectUri = encodeURIComponent("http://34.236.113.112/auth/discord/callback");
+    const redirectUri = encodeURIComponent(`${BASE_URL}/auth/discord/callback`);
     const scope = encodeURIComponent("identify email");
     const responseType = "token";
 

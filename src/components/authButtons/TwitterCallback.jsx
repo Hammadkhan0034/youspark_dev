@@ -15,7 +15,7 @@ export default function TwitterCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
         const receivedState = urlParams.get("state");
-        
+
         const codeVerifier = localStorage.getItem("twitter_code_verifier");
         const storedState = localStorage.getItem("twitter_state");
 
@@ -23,36 +23,35 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Send everything to your backend
+        // ✅ Send data to backend for token exchange
         const response = await API.post("/auth/twitter/callback", {
           code,
           code_verifier: codeVerifier,
           state: receivedState,
-          redirect_uri: `${BASE_URL}/auth/twitter/callback`
+          redirect_uri: `${BASE_URL}/auth/twitter/callback`,
         });
 
         const { data } = response.data;
 
-        // Store tokens
+        // ✅ Store tokens
         localStorage.setItem("access_token", data.access_token);
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Clean up Twitter OAuth data
+        // ✅ Clean up localStorage
         localStorage.removeItem("twitter_code_verifier");
         localStorage.removeItem("twitter_state");
 
-        // Update Redux store
+        // ✅ Update Redux store
         dispatch(setUser(data.user));
 
-        // Navigate based on profile completion
+        // ✅ Redirect user
         if (!data.user.profile_completed) {
           navigate("/user-profile");
         } else {
           navigate("/home");
         }
-
       } catch (error) {
         console.error("Twitter authentication error:", error);
         localStorage.removeItem("twitter_code_verifier");

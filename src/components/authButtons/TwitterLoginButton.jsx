@@ -1,44 +1,58 @@
 import { RiTwitterXFill } from "react-icons/ri";
 
 export default function TwitterLoginButton() {
+  // ✅ Custom UUID generator (Fix for crypto.randomUUID issue)
+  function generateUUID() {
+    if (window.crypto?.randomUUID) {
+      return window.crypto.randomUUID(); // Use built-in function if available
+    } else {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = (Math.random() * 16) | 0,
+          v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+  }
+
   const handleTwitterLogin = () => {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
-    const redirectUri = encodeURIComponent("http://localhost:3000/auth/twitter/callback");
+    const redirectUri = encodeURIComponent("http://34.236.113.112/auth/twitter/callback");
     const scope = encodeURIComponent("tweet.read users.read offline.access");
-    const state = crypto.randomUUID(); // Generate random state
+    const state = generateUUID(); // ✅ Use custom UUID generator
     const codeChallengeMethod = "S256";
     
-    // Generate code verifier (43-128 chars)
+    // ✅ Generate code verifier
     const generateCodeVerifier = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
       const length = 96;
-      let result = '';
+      let result = "";
       const randomValues = new Uint8Array(length);
-      crypto.getRandomValues(randomValues);
-      randomValues.forEach(v => result += chars[v % chars.length]);
+      window.crypto.getRandomValues(randomValues);
+      randomValues.forEach((v) => (result += chars[v % chars.length]));
       return result;
     };
 
     const codeVerifier = generateCodeVerifier();
     
-    // Store code verifier and state in localStorage
+    // ✅ Store code verifier & state in localStorage
     localStorage.setItem("twitter_code_verifier", codeVerifier);
     localStorage.setItem("twitter_state", state);
 
-    // Generate code challenge using SHA-256
+    // ✅ Generate code challenge using SHA-256
     const generateCodeChallenge = async (verifier) => {
       const encoder = new TextEncoder();
       const data = encoder.encode(verifier);
-      const digest = await crypto.subtle.digest('SHA-256', data);
+      const digest = await window.crypto.subtle.digest("SHA-256", data);
       return btoa(String.fromCharCode(...new Uint8Array(digest)))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
     };
 
-    // Initiate OAuth flow
-    generateCodeChallenge(codeVerifier).then(challenge => {
-      const authUrl = `https://twitter.com/i/oauth2/authorize?` +
+    // ✅ Start OAuth flow
+    generateCodeChallenge(codeVerifier).then((challenge) => {
+      const authUrl =
+        `https://twitter.com/i/oauth2/authorize?` +
         `response_type=code` +
         `&client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
