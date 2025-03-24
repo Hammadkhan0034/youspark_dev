@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
-import axios from "axios";
+import API from "../../api/api";
 import { BASE_URL } from "../../config/urls";
 
 export default function TwitterCallback() {
@@ -23,41 +23,15 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        const tokenResponse = await axios.post(
-          "https://api.twitter.com/2/oauth2/token",
-          new URLSearchParams({
-            code: code,
-            grant_type: "authorization_code",
-            client_id: import.meta.env.VITE_TWITTER_CLIENT_ID,
-            redirect_uri: `${BASE_URL}/auth/twitter/callback`,
-            code_verifier: codeVerifier,
-          }),
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          }
-        );
-
-        const { access_token, refresh_token } = tokenResponse.data;
-
-        const userResponse = await axios.get("https://api.twitter.com/2/users/me", {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        });
-
-        const userData = userResponse.data.data;
-
-        const backendResponse = await axios.post(`${import.meta.env.VITE_API_URL}/social-sign-in`, {
-          access_token,
-          refresh_token,
-          twitter_user_data: userData,
-          channel: "twitter",
+        // Send everything to your backend
+        const response = await API.post("/auth/twitter/callback", {
+          code,
+          code_verifier: codeVerifier,
+          state: receivedState,
           redirect_uri: `${BASE_URL}/auth/twitter/callback`
         });
 
-        const { data } = backendResponse.data;
+        const { data } = response.data;
 
         // Store tokens
         localStorage.setItem("access_token", data.access_token);
