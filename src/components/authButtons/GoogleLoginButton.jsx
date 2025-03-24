@@ -13,7 +13,7 @@ const GoogleLoginButton = () => {
     onSuccess: async (response) => {
       try {
         const res = await axios.post(
-          "http://localhost:4000/api/social-sign-in",
+          "http://54.167.153.121:4000/api/social-sign-in",
           {
             access_token: response.access_token,
             channel: "google",
