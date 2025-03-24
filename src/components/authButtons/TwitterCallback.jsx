@@ -12,18 +12,21 @@ export default function TwitterCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Extract code and state from URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
         const receivedState = urlParams.get("state");
 
+        // Retrieve stored state and code_verifier from localStorage
         const codeVerifier = localStorage.getItem("twitter_code_verifier");
         const storedState = localStorage.getItem("twitter_state");
 
+        // Check if the received state matches the stored state to prevent CSRF attacks
         if (receivedState !== storedState) {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // ✅ Send data to backend for token exchange
+        // Send the authorization code and code_verifier to the backend for token exchange
         const response = await API.post("/auth/twitter/callback", {
           code,
           code_verifier: codeVerifier,
@@ -33,20 +36,20 @@ export default function TwitterCallback() {
 
         const { data } = response.data;
 
-        // ✅ Store tokens
+        // Store the access token and refresh token (if available)
         localStorage.setItem("access_token", data.access_token);
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // ✅ Clean up localStorage
+        // Clean up localStorage by removing the code_verifier and state
         localStorage.removeItem("twitter_code_verifier");
         localStorage.removeItem("twitter_state");
 
-        // ✅ Update Redux store
+        // Dispatch the user data to Redux store
         dispatch(setUser(data.user));
 
-        // ✅ Redirect user
+        // Redirect the user based on whether their profile is complete or not
         if (!data.user.profile_completed) {
           navigate("/user-profile");
         } else {
