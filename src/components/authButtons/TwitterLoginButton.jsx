@@ -1,4 +1,5 @@
 import { RiTwitterXFill } from "react-icons/ri";
+import CryptoJS from "crypto-js";
 
 export default function TwitterLoginButton() {
   // ✅ Custom UUID generator (Fix for crypto.randomUUID issue)
@@ -21,17 +22,16 @@ export default function TwitterLoginButton() {
     const state = generateUUID(); // ✅ Use custom UUID generator
     const codeChallengeMethod = "S256";
     
-    // ✅ Generate code verifier
     const generateCodeVerifier = () => {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
       const length = 96;
-      let result = "";
+      let result = '';
       const randomValues = new Uint8Array(length);
-      window.crypto.getRandomValues(randomValues);
-      randomValues.forEach((v) => (result += chars[v % chars.length]));
+      crypto.getRandomValues(randomValues);
+      randomValues.forEach(v => result += chars[v % chars.length]);
       return result;
     };
-
+    
     const codeVerifier = generateCodeVerifier();
     
     // ✅ Store code verifier & state in localStorage
@@ -39,14 +39,14 @@ export default function TwitterLoginButton() {
     localStorage.setItem("twitter_state", state);
 
     // ✅ Generate code challenge using SHA-256
-    const generateCodeChallenge = async (verifier) => {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(verifier);
-      const digest = await window.crypto.subtle.digest("SHA-256", data);
-      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    const generateCodeChallenge = (verifier) => {
+      const hash = CryptoJS.SHA256(verifier);
+      const base64url = hash.toString(CryptoJS.enc.Base64)
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
         .replace(/=+$/, "");
+      
+      return base64url;
     };
 
     // ✅ Start OAuth flow
