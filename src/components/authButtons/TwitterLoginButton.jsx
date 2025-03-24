@@ -2,13 +2,13 @@ import { RiTwitterXFill } from "react-icons/ri";
 
 export default function TwitterLoginButton() {
   const handleTwitterLogin = () => {
-    const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
+    const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID; // Your Twitter Client ID
     const redirectUri = encodeURIComponent("http://localhost:3000/auth/twitter/callback");
     const scope = encodeURIComponent("tweet.read users.read offline.access");
     const state = crypto.randomUUID(); // Generate random state
     const codeChallengeMethod = "S256";
     
-    // Generate code verifier (43-128 chars)
+    // Generate code verifier and challenge
     const generateCodeVerifier = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
       const length = 96;
@@ -21,7 +21,7 @@ export default function TwitterLoginButton() {
 
     const codeVerifier = generateCodeVerifier();
     
-    // Store code verifier and state in localStorage
+    // Store code verifier in localStorage (needed for callback)
     localStorage.setItem("twitter_code_verifier", codeVerifier);
     localStorage.setItem("twitter_state", state);
 

@@ -1,62 +1,58 @@
 import { useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/userSlice";
+import API from "../../api/api";
 
 export default function LineCallback() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // Function to exchange the authorization code for an access token
-  const exchangeCodeForToken = async (code) => {
-    try {
-      // Exchange the code for an access token
-      const response = await axios.post(
-        "https://api.line.me/oauth2/v2.1/token",
-        new URLSearchParams({
-          grant_type: "authorization_code",
-          code: code,
-          redirect_uri: "http://localhost:3000/auth/line/callback", // No trailing slash
-          client_id: import.meta.env.VITE_LINE_CHANNEL_ID, // Access environment variable
-          client_secret: import.meta.env.VITE_LINE_CHANNEL_SECRET, // Access environment variable
-        }),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      const accessToken = response.data.access_token;
-      const idToken = response.data.id_token; // LINE also returns an ID token
-      console.log("Access Token:", accessToken);
-      console.log("ID Token:", idToken);
-
-      // Use the access token to fetch user data
-      const userResponse = await axios.get("https://api.line.me/v2/profile", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      console.log("User Data:", userResponse.data);
-
-      // Navigate to /home after successful login
-      navigate("/home");
-    } catch (error) {
-      console.error("Error exchanging code for token:", error);
-      // Handle the error gracefully (e.g., show a message to the user)
-    }
-  };
-
-  // Check for the authorization code in the URL (callback handling)
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code");
+    const handleCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+      const state = urlParams.get("state");
 
-    if (code) {
-      exchangeCodeForToken(code);
-    } else {
-      console.error("Authorization code not found");
-      // Handle the missing code gracefully (e.g., show a message to the user)
-    }
-  }, [navigate]);
+      if (!code) {
+        console.error("No authorization code found");
+        navigate("/signin-socials");
+        return;
+      }
 
-  return <div>Loading...</div>;
+      try {
+        // Exchange code for tokens using your backend
+        const response = await API.post("/social-sign-in", {
+          code,
+          channel: "line",
+        });
+
+        const { data } = response.data;
+
+        // Store tokens
+        localStorage.setItem("access_token", data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem("refresh_token", data.refresh_token);
+        }
+
+        // Update Redux store
+        dispatch(setUser(response.data.user));
+
+        // Navigate to user profile page
+        navigate("/user-profile");
+        
+      } catch (error) {
+        console.error("LINE authentication error:", error);
+        navigate("/signin-socials");
+      }
+    };
+
+    handleCallback();
+  }, [navigate, dispatch]);
+
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  );
 }
