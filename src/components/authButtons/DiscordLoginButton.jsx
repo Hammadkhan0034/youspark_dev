@@ -5,9 +5,18 @@ export default function DiscordLoginButton() {
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
     const redirectUri = encodeURIComponent("http://localhost:3000/auth/discord/callback");
     const scope = encodeURIComponent("identify email");
+    const state = crypto.randomUUID();
     const responseType = "token";
 
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+    // Store state for security validation
+    localStorage.setItem("discord_state", state);
+
+    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?` +
+      `client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&response_type=${responseType}` +
+      `&scope=${scope}` +
+      `&state=${state}`;
 
     window.location.href = discordAuthUrl;
   };

@@ -15,12 +15,25 @@ export default function DiscordCallback() {
       if (hash) {
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get("access_token");
+        const state = params.get("state");
+        const storedState = localStorage.getItem("discord_state");
+
+        // Verify state to prevent CSRF attacks
+        if (state !== storedState) {
+          console.error("State mismatch - possible CSRF attack");
+          navigate("/signin-socials");
+          return;
+        }
+
+        // Clean up state
+        localStorage.removeItem("discord_state");
 
         if (accessToken) {
           try {
+            // Send access token and channel to your backend
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
-              channel: "discord",
+              channel: "discord"
             });
 
             const { data } = response.data;
@@ -31,25 +44,24 @@ export default function DiscordCallback() {
               localStorage.setItem("refresh_token", data.refresh_token);
             }
 
+            // Store user data
+            localStorage.setItem("user", JSON.stringify(data.user));
+
             // Update Redux store
             dispatch(setUser(data.user));
 
-            // Clear the hash from URL
-            window.history.replaceState(null, null, window.location.pathname);
-
-            // Always redirect to profile page first
-            navigate("/user-profile");
-            
+            // Navigate based on profile completion
+            if (!data.user.profile_completed) {
+              navigate("/user-profile");
+            } else {
+              navigate("/home");
+            }
           } catch (error) {
             console.error("Error during Discord authentication:", error);
             navigate("/signin-socials");
           }
-        } else {
-          console.error("No access token found in URL hash");
-          navigate("/signin-socials");
         }
       } else {
-        console.error("No hash found in URL");
         navigate("/signin-socials");
       }
     };
