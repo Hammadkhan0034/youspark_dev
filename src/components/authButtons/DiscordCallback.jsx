@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
+import { BASE_URL } from "../../config/urls";
 
 export default function DiscordCallback() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function DiscordCallback() {
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
               channel: "discord",
+              redirect_uri: `${BASE_URL}/auth/discord/callback` // Include redirect_uri
             });
 
             const { data } = response.data;
@@ -37,8 +39,12 @@ export default function DiscordCallback() {
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Always redirect to profile page first
-            navigate("/user-profile");
+            // Navigate based on profile completion
+            if (!data.user.profile_completed) {
+              navigate("/user-profile");
+            } else {
+              navigate("/home");
+            }
             
           } catch (error) {
             console.error("Error during Discord authentication:", error);
