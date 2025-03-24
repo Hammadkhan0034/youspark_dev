@@ -16,8 +16,8 @@ const MultiStepForm = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    first_name: "", // Add first name
-    last_name: "",  // Add last name
+    // first_name: "", // Add first name
+    // last_name: "",  // Add last name
     nickname: user?.nickname || "",
     birth_date: "",
     gender: "",
@@ -187,7 +187,7 @@ const MultiStepForm = () => {
             <div>
               <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
 
-              <input
+              {/* <input
                 type="text"
                 name="first_name"
                 value={formData.first_name}
@@ -202,7 +202,7 @@ const MultiStepForm = () => {
                 onChange={handleChange}
                 placeholder="Last Name"
                 className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
-              />
+              /> */}
 
               <input
                 type="text"
