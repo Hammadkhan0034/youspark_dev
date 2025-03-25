@@ -1,14 +1,22 @@
 import { FaTwitter } from "react-icons/fa";
-import { BASE_URL } from "../../config/urls/urls";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function TwitterLoginButton() {
   const handleTwitterLogin = () => {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${BASE_URL}/auth/twitter/callback`);
+    const redirectUri = encodeURIComponent(AUTH_CALLBACKS.twitter);
     const scope = encodeURIComponent("tweet.read users.read offline.access");
-    const responseType = "token";
+    const state = generateUUID();
+    
+    // Store state for CSRF protection
+    localStorage.setItem("twitter_auth_state", state);
 
-    const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+    const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?` +
+      `response_type=token` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=${scope}` +
+      `&state=${state}`;
 
     window.location.href = twitterAuthUrl;
   };
@@ -22,4 +30,13 @@ export default function TwitterLoginButton() {
       Continue with Twitter
     </button>
   );
+}
+
+// UUID Generator for state parameter
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }

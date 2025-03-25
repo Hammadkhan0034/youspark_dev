@@ -21,8 +21,7 @@ export default function TwitterCallback() {
           try {
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
-              channel: "twitter",
-              redirect_uri: `${BASE_URL}/auth/twitter/callback`,
+              channel: "twitter"
             });
 
             const { data } = response.data;
@@ -33,14 +32,25 @@ export default function TwitterCallback() {
               localStorage.setItem("refresh_token", data.refresh_token);
             }
 
+            // Create user object from response
+            const userData = {
+              id: data.id,
+              email: data.email,
+              username: data.user_name,
+              userStatus: data.user_status,
+              userImage: data.user_image,
+              firstLogin: data.first_login,
+              appName: data.app_name
+            };
+
             // Update Redux store
-            dispatch(setUser(data.user));
+            dispatch(setUser(userData));
 
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Navigate based on profile completion
-            if (!data.user.profile_completed) {
+            // Navigate based on first_login flag
+            if (data.first_login) {
               navigate("/user-profile");
             } else {
               navigate("/home");
