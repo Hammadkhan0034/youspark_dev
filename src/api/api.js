@@ -31,7 +31,7 @@ API.interceptors.response.use(
         // Try to refresh the token
         const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
-          const response = await axios.post("http://localhost:4000/api/auth/refresh", {
+          const response = await axios.post("http://ec2-54-167-153-121.compute-1.amazonaws.com:4000/api/auth/refresh", {
             refresh_token: refreshToken
           });
 

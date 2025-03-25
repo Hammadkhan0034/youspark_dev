@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
-import { BASE_URL } from "../../config/urls";
+import { BASE_URL } from "../../config/urls/urls";
 
 export default function TwitterCallback() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { FaDiscord } from "react-icons/fa";
-import { BASE_URL } from "../../config/urls";
+import { BASE_URL } from "../../config/urls/urls";
 export default function DiscordLoginButton() {
   const handleDiscordLogin = () => {
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;

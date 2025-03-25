@@ -6,6 +6,8 @@ export const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
 export const AUTH_CALLBACKS = {
   discord: `${BASE_URL}/auth/discord/callback`,
   twitter: `${BASE_URL}/auth/twitter/callback`,
+  kakao: `${BASE_URL}/auth/kakao/callback`,
+  apple: `${BASE_URL}/auth/apple/callback`,
   // Add other social login callbacks here
 };
 

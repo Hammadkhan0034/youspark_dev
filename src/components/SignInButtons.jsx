@@ -7,6 +7,7 @@ import AppleLoginButton from "./authButtons/AppleLoginButton";
 import InstagramLoginButton from "./authButtons/InstagramLoginButton";
 import TwitterLoginButton from "./authButtons/TwitterLoginButton";
 import DiscordLoginButton from "./authButtons/DiscordLoginButton";
+import KakaoLoginButton from "./authButtons/KakaoLoginButton";
 import SignInEmailButton from "./authButtons/SignInEmailButton";
 
 export default function SignInButtons() {
@@ -30,6 +31,7 @@ export default function SignInButtons() {
           <FacebookLoginButton />
           <LineLoginButton />
           <AppleLoginButton />
+          <KakaoLoginButton />
           <InstagramLoginButton />
           <TwitterLoginButton />
           <DiscordLoginButton />

@@ -13,7 +13,9 @@ import UserProfileTwo from './pages/UserProfileTwo';
 import VirtualCard from './components/VirtualCard';
 import DiscordCallback from './components/authButtons/DiscordCallback';
 import TwitterCallback from './components/authButtons/TwitterCallback';
+import AppleCallback from './components/authButtons/AppleCallback';
 import Languages from './pages/Languages';
+import KakaoCallback from './components/authButtons/KakaoCallback';
 
 function App() {
   const dispatch = useDispatch();
@@ -22,7 +24,7 @@ function App() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem('access_token');
-      
+
       if (token && !isAuthenticated) {
         try {
           const response = await API.get('/users/me');
@@ -45,7 +47,7 @@ function App() {
   // Protected Route Component
   const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('access_token');
-    
+
     if (!token || !isAuthenticated) {
       return <Navigate to="/signin-socials" replace />;
     }
@@ -60,7 +62,7 @@ function App() {
   // Profile Route Component
   const ProfileRoute = ({ children }) => {
     const token = localStorage.getItem('access_token');
-    
+
     if (!token || !isAuthenticated) {
       return <Navigate to="/signin-socials" replace />;
     }
@@ -75,10 +77,10 @@ function App() {
   // Auth Route Component
   const AuthRoute = ({ children }) => {
     const token = localStorage.getItem('access_token');
-    
+
     if (token && isAuthenticated) {
-      return user?.profile_completed ? 
-        <Navigate to="/home" replace /> : 
+      return user?.profile_completed ?
+        <Navigate to="/home" replace /> :
         <Navigate to="/user-profile" replace />;
     }
 
@@ -94,7 +96,7 @@ function App() {
             <Navigate to="/signin-socials" replace />
           </AuthRoute>
         } />
-        
+
         <Route path="/signin-socials" element={
           <AuthRoute>
             <SignInSocials />
@@ -103,19 +105,19 @@ function App() {
 
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        
+
         {/* Auth Callback Routes */}
         <Route path="/auth/discord/callback" element={<DiscordCallback />} />
         <Route path="/auth/twitter/callback" element={<TwitterCallback />} />
 
         {/* Profile Setup Route */}
-        <Route 
-          path="/user-profile" 
+        <Route
+          path="/user-profile"
           element={
             <ProfileRoute>
               <UserProfileTwo />
             </ProfileRoute>
-          } 
+          }
         />
 
         {/* Protected Routes */}
@@ -151,7 +153,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route path="/auth/apple/callback" element={<AppleCallback />} />
+        <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         {/* Fallback route for unknown paths */}
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
