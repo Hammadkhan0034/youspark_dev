@@ -24,47 +24,32 @@ export default function KakaoCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Exchange authorization code for Kakao access & refresh tokens
-        const tokenResponse = await fetch("https://kauth.kakao.com/oauth/token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            client_id: import.meta.env.VITE_KAKAO_CLIENT_ID,
-            redirect_uri: AUTH_CALLBACKS.kakao,
-            code,
-          }),
+        // Send the authorization code to the backend to exchange for an access token
+        const response = await API.post("/auth/kakao", {
+          code,
+          redirect_uri: AUTH_CALLBACKS.kakao,
         });
 
-        if (!tokenResponse.ok) throw new Error("Failed to fetch access token");
+        if (!response.data || !response.data.access_token) {
+          throw new Error("Failed to get access token from backend");
+        }
 
-        const tokenData = await tokenResponse.json();
-        const { access_token, refresh_token } = tokenData;
+        const { access_token, refresh_token, user } = response.data;
 
-        // Store the access and refresh tokens in localStorage
+        // Store tokens in localStorage
         localStorage.setItem("access_token", access_token);
         if (refresh_token) {
           localStorage.setItem("refresh_token", refresh_token);
         }
 
-        // Send the access token to the backend for authentication
-        const response = await API.post("/social-sign-in", {
-          access_token, // Send access token to backend
-          channel: "kakao",
-        });
-
-        const { data } = response.data;
-
         // Store user data in Redux
-        dispatch(setUser(data.user));
+        dispatch(setUser(user));
 
         // Clean up localStorage
         localStorage.removeItem("kakao_auth_state");
 
         // Navigate based on profile completion
-        if (!data.user.profile_completed) {
+        if (!user.profile_completed) {
           navigate("/user-profile");
         } else {
           navigate("/home");
