@@ -22,7 +22,7 @@ export default function DiscordCallback() {
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
               channel: "discord",
-              redirect_uri: BASE_URL.discord // Include redirect_uri
+              redirect_uri: `${BASE_URL}/auth/discord/callback` // Include redirect_uri
             });
 
             const { data } = response.data;
