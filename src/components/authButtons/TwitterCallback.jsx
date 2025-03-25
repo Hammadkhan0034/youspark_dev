@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
 import axios from "axios";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function TwitterCallback() {
   const navigate = useNavigate();
