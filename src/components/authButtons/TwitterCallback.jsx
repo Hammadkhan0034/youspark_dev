@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
+import axios from "axios";
 
 export default function TwitterCallback() {
   const navigate = useNavigate();
@@ -12,15 +13,38 @@ export default function TwitterCallback() {
     const handleCallback = async () => {
       try {
         const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("access_token");
+        const code = params.get("code");
+        const receivedState = params.get("state");
+        const storedState = localStorage.getItem("twitter_state");
+        const codeVerifier = localStorage.getItem("twitter_code_verifier");
 
-        if (!accessToken) {
-          throw new Error("No access token found");
+        // Verify state
+        if (!storedState || receivedState !== storedState) {
+          throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Send only access_token and channel to backend
+        // Exchange code for access token
+        const tokenResponse = await axios.post(
+          "https://api.twitter.com/2/oauth2/token",
+          new URLSearchParams({
+            code: code,
+            grant_type: "authorization_code",
+            client_id: import.meta.env.VITE_TWITTER_CLIENT_ID,
+            redirect_uri: AUTH_CALLBACKS.twitter,
+            code_verifier: codeVerifier,
+          }),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        const { access_token } = tokenResponse.data;
+
+        // Send access token to your backend
         const response = await API.post("/social-sign-in", {
-          access_token: accessToken,
+          access_token: access_token,
           channel: "twitter"
         });
 
@@ -31,6 +55,10 @@ export default function TwitterCallback() {
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
+
+        // Clean up OAuth state
+        localStorage.removeItem("twitter_code_verifier");
+        localStorage.removeItem("twitter_state");
 
         // Create user object from response
         const userData = {
@@ -51,6 +79,8 @@ export default function TwitterCallback() {
 
       } catch (error) {
         console.error("Twitter authentication error:", error);
+        localStorage.removeItem("twitter_code_verifier");
+        localStorage.removeItem("twitter_state");
         navigate("/signin-socials");
       }
     };
