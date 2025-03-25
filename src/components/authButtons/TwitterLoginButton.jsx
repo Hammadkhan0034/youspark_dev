@@ -6,8 +6,8 @@ export default function TwitterLoginButton() {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
     const redirectUri = encodeURIComponent(AUTH_CALLBACKS.twitter);
     
-    // Generate state
-    const state = crypto.randomUUID();
+    // Generate state using the compatible UUID generator
+    const state = generateUUID();
     localStorage.setItem("twitter_auth_state", state);
 
     // Twitter OAuth 2.0 parameters
@@ -17,7 +17,7 @@ export default function TwitterLoginButton() {
       redirect_uri: redirectUri,
       scope: 'tweet.read users.read',
       state: state,
-      code_challenge: 'challenge', // Add PKCE support if needed
+      code_challenge: 'challenge',
       code_challenge_method: 'plain'
     });
 
@@ -34,6 +34,15 @@ export default function TwitterLoginButton() {
       Continue with Twitter
     </button>
   );
+}
+
+// Fallback UUID Generator (Compatible with all browsers)
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 
