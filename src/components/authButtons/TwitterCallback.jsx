@@ -23,32 +23,11 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Exchange the code for an access token
-        const tokenResponse = await fetch("https://api.twitter.com/2/oauth2/token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${btoa(`${process.env.REACT_APP_TWITTER_CLIENT_ID}:${process.env.REACT_APP_TWITTER_CLIENT_SECRET}`)}`,
-          },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            code,
-            redirect_uri: AUTH_CALLBACKS.twitter,
-            code_verifier: codeVerifier,
-            client_id: process.env.REACT_APP_TWITTER_CLIENT_ID,
-          }),
-        });
-
-        const tokenData = await tokenResponse.json();
-
-        if (!tokenData.access_token) {
-          throw new Error("Missing access token");
-        }
-
-        // Send access_token and channel to backend
+        // Send the code and code_verifier to your backend
         const response = await API.post("/social-sign-in", {
-          access_token: tokenData.access_token,
-          channel: "twitter",
+          code,
+          code_verifier: codeVerifier,
+          redirect_uri: AUTH_CALLBACKS.twitter
         });
 
         const { data } = response.data;
@@ -71,7 +50,7 @@ export default function TwitterCallback() {
           userStatus: data.user_status,
           userImage: data.user_image,
           firstLogin: data.first_login,
-          appName: data.app_name,
+          appName: data.app_name
         };
 
         // Update Redux store
@@ -79,6 +58,7 @@ export default function TwitterCallback() {
 
         // Navigate based on first login
         navigate(data.first_login ? "/user-profile" : "/home");
+
       } catch (error) {
         console.error("Twitter authentication error:", error);
         localStorage.removeItem("twitter_code_verifier");
