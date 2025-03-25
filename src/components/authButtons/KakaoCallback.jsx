@@ -12,48 +12,52 @@ export default function KakaoCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the authorization code and state from URL
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
         const receivedState = params.get("state");
 
-        // Retrieve stored state from localStorage
         const storedState = localStorage.getItem("kakao_auth_state");
 
         if (!storedState || receivedState !== storedState) {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Send the authorization code to the backend to exchange for an access token
         const response = await API.post("/social-sign-in", {
           code,
           redirect_uri: AUTH_CALLBACKS.kakao,
+          channel: "kakao"
         });
 
-        if (!response.data || !response.data.access_token) {
-          throw new Error("Failed to get access token from backend");
-        }
+        const { data } = response.data;
 
-        const { access_token, refresh_token, user } = response.data;
+        // Store tokens
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
 
-        // Store tokens in localStorage
-        localStorage.setItem("access_token", access_token);
-        if (refresh_token) {
-          localStorage.setItem("refresh_token", refresh_token);
-        }
+        // Create user object from response
+        const userData = {
+          id: data.id,
+          email: data.email,
+          username: data.user_name,
+          userStatus: data.user_status,
+          userImage: data.user_image,
+          firstLogin: data.first_login,
+          appName: data.app_name
+        };
 
-        // Store user data in Redux
-        dispatch(setUser(user));
+        // Update Redux store with user data
+        dispatch(setUser(userData));
 
-        // Clean up localStorage
+        // Clean up
         localStorage.removeItem("kakao_auth_state");
 
-        // Navigate based on profile completion
-        if (!user.profile_completed) {
+        // Navigate based on first login
+        if (data.first_login) {
           navigate("/user-profile");
         } else {
           navigate("/home");
         }
+
       } catch (error) {
         console.error("Kakao authentication error:", error);
         navigate("/signin-socials");
