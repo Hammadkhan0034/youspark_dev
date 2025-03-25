@@ -23,7 +23,11 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Store code and codeVerifier in localStorage before making the request
+        // ✅ Log values to check if they are correctly received
+        console.log("🔹 Authorization Code:", code);
+        console.log("🔹 Code Verifier:", codeVerifier);
+
+        // Store code and codeVerifier in localStorage
         localStorage.setItem("twitter_code", code);
         localStorage.setItem("twitter_code_verifier", codeVerifier);
 
@@ -44,6 +48,7 @@ export default function TwitterCallback() {
 
         // Clean up OAuth state
         localStorage.removeItem("twitter_state");
+        localStorage.removeItem("twitter_code_verifier");
 
         // Create user object from response
         const userData = {
@@ -63,76 +68,16 @@ export default function TwitterCallback() {
         navigate(data.first_login ? "/user-profile" : "/home");
 
       } catch (error) {
-        console.error("Twitter authentication error:", error);
+        console.error("❌ Twitter authentication error:", error);
         localStorage.removeItem("twitter_code");
         localStorage.removeItem("twitter_code_verifier");
         localStorage.removeItem("twitter_state");
         navigate("/signin-socials");
       }
     };
-    useEffect(() => {
-      const handleCallback = async () => {
-        try {
-          const params = new URLSearchParams(window.location.search);
-          const code = params.get("code");
-          const receivedState = params.get("state");
-          const storedState = localStorage.getItem("twitter_state");
-          const codeVerifier = localStorage.getItem("twitter_code_verifier");
-  
-          // Verify state
-          if (!storedState || receivedState !== storedState) {
-            throw new Error("State mismatch - possible CSRF attack");
-          }
-  
-          // Send the code and code_verifier to your backend
-          const response = await API.post("/social-sign-in", {
-            code,
-            code_verifier: codeVerifier,
-            redirect_uri: AUTH_CALLBACKS.twitter
-          });
-  
-          const { data } = response.data;
-  
-          // Store tokens
-          localStorage.setItem("code", data.code);
-          if (data.refresh_token) {
-            localStorage.setItem("code_verifier", data.codeVerifier);
-          }
-  
-          // Clean up OAuth state
-          localStorage.setItem("twitter_code_verifier");
-          localStorage.removeItem("twitter_state");
-  
-          // Create user object from response
-          const userData = {
-            id: data.id,
-            email: data.email,
-            username: data.user_name,
-            userStatus: data.user_status,
-            userImage: data.user_image,
-            firstLogin: data.first_login,
-            appName: data.app_name
-          };
-  
-          // Update Redux store
-          dispatch(setUser(userData));
-  
-          // Navigate based on first login
-          navigate(data.first_login ? "/user-profile" : "/home");
-  
-        } catch (error) {
-          console.error("Twitter authentication error:", error);
-          localStorage.removeItem("twitter_code_verifier");
-          localStorage.removeItem("twitter_state");
-          navigate("/signin-socials");
-        }
-      };
-  
-      handleCallback();
-    }, [navigate, dispatch]);
-  
+
     handleCallback();
-  }, [navigate, dispatch]);
+  }, [navigate, dispatch]); 
 
   return (
     <div className="flex justify-center items-center h-screen">
