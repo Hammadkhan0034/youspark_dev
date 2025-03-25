@@ -1,26 +1,18 @@
 import { IoLogoApple } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../redux/userSlice";
-import API from "../../api/api";
 import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function AppleLoginButton() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
   const handleAppleLogin = async () => {
     try {
-      // Apple Sign-In configuration
       const clientId = import.meta.env.VITE_APPLE_CLIENT_ID;
       const redirectUri = encodeURIComponent(AUTH_CALLBACKS.apple);
-      const scope = encodeURIComponent('name email');
-      const state = crypto.randomUUID(); // Generate random state
-      const nonce = crypto.randomUUID(); // Generate random nonce
+      const scope = encodeURIComponent("name email");
+      const state = generateUUID(); // Use a safe UUID generator
+      const nonce = generateUUID(); // Use a safe nonce generator
 
       // Store state and nonce in localStorage for verification
-      localStorage.setItem('apple_auth_state', state);
-      localStorage.setItem('apple_auth_nonce', nonce);
+      localStorage.setItem("apple_auth_state", state);
+      localStorage.setItem("apple_auth_nonce", nonce);
 
       // Construct Apple authorization URL
       const authUrl = `https://appleid.apple.com/auth/authorize?` +
@@ -32,9 +24,8 @@ export default function AppleLoginButton() {
         `&state=${state}` +
         `&nonce=${nonce}`;
 
-      // Redirect to Apple Sign-In
+      // Redirect user to Apple login
       window.location.href = authUrl;
-
     } catch (error) {
       console.error("Error initiating Apple Sign-In:", error);
     }
@@ -49,4 +40,13 @@ export default function AppleLoginButton() {
       Continue with Apple
     </button>
   );
+}
+
+// Fallback UUID Generator (Compatible with all browsers)
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
