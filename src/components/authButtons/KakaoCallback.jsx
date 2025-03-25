@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
-import { AUTH_CALLBACKS } from "../../config/urls/urls";
+import { BASE_URL } from "../../config/urls/urls";
 
 export default function KakaoCallback() {
   const navigate = useNavigate();
@@ -27,7 +27,8 @@ export default function KakaoCallback() {
         // Send the authorization code to the backend to exchange for an access token
         const response = await API.post("/auth/kakao", {
           code,
-          redirect_uri: AUTH_CALLBACKS.kakao,
+          redirect_uri: `${BASE_URL}/auth/kakao/callback` // Include redirect_uri
+          
         });
 
         if (!response.data || !response.data.access_token) {

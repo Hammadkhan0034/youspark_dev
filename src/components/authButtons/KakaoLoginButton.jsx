@@ -1,11 +1,12 @@
 import { RiKakaoTalkFill } from "react-icons/ri";
-import { AUTH_CALLBACKS } from "../../config/urls/urls";
+import { BASE_URL } from "../../config/urls/urls";
 
 export default function KakaoLoginButton() {
   const handleKakaoLogin = () => {
     try {
       const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
-      const redirectUri = encodeURIComponent(AUTH_CALLBACKS.kakao);
+      const redirectUri = encodeURIComponent(`${BASE_URL}/auth/kakao/callback`);
+      
       const state = generateUUID(); // Generate a compatible UUID
 
       // Store state for CSRF protection
