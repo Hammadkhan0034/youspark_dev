@@ -25,7 +25,7 @@ export default function KakaoCallback() {
         }
 
         // Send the authorization code to the backend to exchange for an access token
-        const response = await API.post("/auth/kakao", {
+        const response = await API.post("/social-sign-in", {
           code,
           redirect_uri: `${BASE_URL}/auth/kakao/callback` // Include redirect_uri
           

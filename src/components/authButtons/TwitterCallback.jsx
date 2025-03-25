@@ -25,7 +25,7 @@ export default function TwitterCallback() {
         }
 
         // Exchange authorization code for access token
-        const tokenResponse = await API.post("/auth/twitter/token", {
+        const tokenResponse = await API.post("/social-sign-in", {
           code,
           code_verifier: codeVerifier,
           redirect_uri: `${BASE_URL}/auth/twitter/callback`,
