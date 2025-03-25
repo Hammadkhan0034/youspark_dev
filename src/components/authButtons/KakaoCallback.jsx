@@ -13,6 +13,15 @@ export default function KakaoCallback() {
     const handleCallback = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
+      const receivedState = params.get("state");
+      const storedState = localStorage.getItem("kakao_auth_state");
+
+      // Validate state to prevent CSRF attacks
+      if (!storedState || storedState !== receivedState) {
+        console.error("State mismatch. Possible CSRF attack.");
+        navigate("/signin-socials");
+        return;
+      }
 
       if (code) {
         try {

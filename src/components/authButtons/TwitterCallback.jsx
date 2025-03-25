@@ -5,55 +5,56 @@ import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
 import { BASE_URL } from "../../config/urls/urls";
 
-export default function KakaoCallback() {
+export default function TwitterCallback() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const handleCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      const receivedState = params.get("state");
-      const storedState = localStorage.getItem("kakao_auth_state");
+      const hash = window.location.hash;
 
-      // Validate state to prevent CSRF attacks
-      if (!storedState || storedState !== receivedState) {
-        console.error("State mismatch. Possible CSRF attack.");
-        navigate("/signin-socials");
-        return;
-      }
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
 
-      if (code) {
-        try {
-          const response = await API.post("/social-sign-in", {
-            access_token: code,
-            channel: "kakao",
-            redirect_uri: `${BASE_URL}/auth/kakao/callback`,
-          });
+        if (accessToken) {
+          try {
+            const response = await API.post("/social-sign-in", {
+              access_token: accessToken,
+              channel: "twitter",
+              redirect_uri: `${BASE_URL}/auth/twitter/callback`,
+            });
 
-          const { data } = response.data;
+            const { data } = response.data;
 
-          // Store tokens
-          localStorage.setItem("access_token", data.access_token);
-          if (data.refresh_token) {
-            localStorage.setItem("refresh_token", data.refresh_token);
+            // Store tokens
+            localStorage.setItem("access_token", data.access_token);
+            if (data.refresh_token) {
+              localStorage.setItem("refresh_token", data.refresh_token);
+            }
+
+            // Update Redux store
+            dispatch(setUser(data.user));
+
+            // Clear the hash from URL
+            window.history.replaceState(null, null, window.location.pathname);
+
+            // Navigate based on profile completion
+            if (!data.user.profile_completed) {
+              navigate("/user-profile");
+            } else {
+              navigate("/home");
+            }
+          } catch (error) {
+            console.error("Error during Twitter authentication:", error);
+            navigate("/signin-socials");
           }
-
-          // Update Redux store
-          dispatch(setUser(data.user));
-
-          // Navigate based on profile completion
-          if (!data.user.profile_completed) {
-            navigate("/user-profile");
-          } else {
-            navigate("/home");
-          }
-        } catch (error) {
-          console.error("Error during Kakao authentication:", error);
+        } else {
+          console.error("No access token found in URL hash");
           navigate("/signin-socials");
         }
       } else {
-        console.error("No authorization code found in URL");
+        console.error("No hash found in URL");
         navigate("/signin-socials");
       }
     };
