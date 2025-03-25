@@ -45,12 +45,8 @@ export default function TwitterCallback() {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Clean up OAuth data
-        localStorage.removeItem("twitter_code_verifier");
-        localStorage.removeItem("twitter_state");
-
-        // Update Redux store
-        dispatch(setUser({
+        // Create user object from response
+        const userData = {
           id: data.id,
           email: data.email,
           username: data.user_name,
@@ -58,9 +54,16 @@ export default function TwitterCallback() {
           userImage: data.user_image,
           firstLogin: data.first_login,
           appName: data.app_name
-        }));
+        };
 
-        // Navigate based on profile completion
+        // Update Redux store with user data
+        dispatch(setUser(userData));
+
+        // Clean up OAuth data
+        localStorage.removeItem("twitter_code_verifier");
+        localStorage.removeItem("twitter_state");
+
+        // Navigate based on first login
         navigate(data.first_login ? "/user-profile" : "/home");
 
       } catch (error) {
