@@ -11,54 +11,50 @@ export default function TwitterCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
-        const receivedState = urlParams.get("state");
+      const hash = window.location.hash;
 
-        // Retrieve stored state and code_verifier from localStorage
-        const codeVerifier = localStorage.getItem("twitter_code_verifier");
-        const storedState = localStorage.getItem("twitter_state");
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
 
-        if (receivedState !== storedState) {
-          throw new Error("State mismatch - possible CSRF attack");
+        if (accessToken) {
+          try {
+            const response = await API.post("/social-sign-in", {
+              access_token: accessToken,
+              channel: "twitter",
+              redirect_uri: `${BASE_URL}/auth/twitter/callback`,
+            });
+
+            const { data } = response.data;
+
+            // Store tokens
+            localStorage.setItem("access_token", data.access_token);
+            if (data.refresh_token) {
+              localStorage.setItem("refresh_token", data.refresh_token);
+            }
+
+            // Update Redux store
+            dispatch(setUser(data.user));
+
+            // Clear the hash from URL
+            window.history.replaceState(null, null, window.location.pathname);
+
+            // Navigate based on profile completion
+            if (!data.user.profile_completed) {
+              navigate("/user-profile");
+            } else {
+              navigate("/home");
+            }
+          } catch (error) {
+            console.error("Error during Twitter authentication:", error);
+            navigate("/signin-socials");
+          }
+        } else {
+          console.error("No access token found in URL hash");
+          navigate("/signin-socials");
         }
-
-        // Exchange authorization code for access token
-        const tokenResponse = await API.post("/social-sign-in", {
-          code,
-          code_verifier: codeVerifier,
-          redirect_uri: `${BASE_URL}/auth/twitter/callback`,
-        });
-
-        const { access_token, refresh_token, user } = tokenResponse.data;
-
-        // Store tokens
-        localStorage.setItem("access_token", access_token);
-        if (refresh_token) {
-          localStorage.setItem("refresh_token", refresh_token);
-        }
-
-        // Send tokens & channel info to backend
-        await API.post("/auth/twitter/save-token", {
-          access_token,
-          refresh_token,
-          channel: "twitter", // Send channel info
-        });
-
-        // Clean up localStorage
-        localStorage.removeItem("twitter_code_verifier");
-        localStorage.removeItem("twitter_state");
-
-        // Dispatch user data to Redux store
-        dispatch(setUser(user));
-
-        // Redirect user
-        navigate(user.profile_completed ? "/home" : "/user-profile");
-      } catch (error) {
-        console.error("Twitter authentication error:", error);
-        localStorage.removeItem("twitter_code_verifier");
-        localStorage.removeItem("twitter_state");
+      } else {
+        console.error("No hash found in URL");
         navigate("/signin-socials");
       }
     };
