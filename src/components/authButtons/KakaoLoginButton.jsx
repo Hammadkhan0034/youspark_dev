@@ -7,14 +7,20 @@ export default function KakaoLoginButton() {
     const redirectUri = encodeURIComponent(`${BASE_URL}/auth/kakao/callback`);
     const responseType = "code";
 
-    // Generate a random state using crypto.getRandomValues
-    const state = encodeURIComponent(Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')); 
-    localStorage.setItem('kakao_auth_state', state); // Store state for verification
+    // Generate a random state for CSRF protection
+    const state = encodeURIComponent(
+      Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")
+    );
+    localStorage.setItem("kakao_auth_state", state); // Store state for verification
 
-    const scope = encodeURIComponent('profile_nickname profile_image account_email gender age_range birthday'); // Request necessary permissions
-    
+    // Request necessary permissions (scopes)
+    const scope = encodeURIComponent(
+      "profile_nickname profile_image account_email gender age_range birthday"
+    );
+
+    // Construct Kakao OAuth URL
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?` +
       `client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
