@@ -6,7 +6,7 @@ export default function KakaoLoginButton() {
     try {
       const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
       const redirectUri = encodeURIComponent(AUTH_CALLBACKS.kakao);
-      const state = crypto.randomUUID(); // Generate random state for CSRF protection
+      const state = generateUUID(); // Generate a compatible UUID
 
       // Store state for CSRF protection
       localStorage.setItem("kakao_auth_state", state);
@@ -34,4 +34,13 @@ export default function KakaoLoginButton() {
       Continue with Kakao
     </button>
   );
+}
+
+// Fallback UUID Generator (Compatible with all browsers)
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
