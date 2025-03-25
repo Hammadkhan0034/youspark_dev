@@ -3,9 +3,19 @@ import { RiTwitterXFill } from "react-icons/ri";
 export default function TwitterLoginButton() {
   const handleTwitterLogin = () => {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
-    const redirectUri = encodeURIComponent("http://localhost:3000/auth/twitter/callback");
+    const redirectUri = encodeURIComponent("http://34.236.113.112/auth/twitter/callback");
     const scope = encodeURIComponent("tweet.read users.read offline.access");
-    const state = crypto.randomUUID(); // Generate random state
+    
+    // Generate UUID compatible with all browsers
+    const generateUUID = () => {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    };
+    
+    const state = generateUUID(); // Use the compatible UUID generator
     const codeChallengeMethod = "S256";
     
     // Generate code verifier (43-128 chars)

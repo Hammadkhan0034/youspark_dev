@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
+import API from "../../api/api";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 import axios from "axios";
 
 export default function TwitterCallback() {
@@ -32,7 +34,7 @@ export default function TwitterCallback() {
             code: code,
             grant_type: "authorization_code",
             client_id: import.meta.env.VITE_TWITTER_CLIENT_ID,
-            redirect_uri: "http://localhost:3000/auth/twitter/callback",
+            redirect_uri: AUTH_CALLBACKS.twitter,
             code_verifier: codeVerifier,
           }),
           {
@@ -54,7 +56,7 @@ export default function TwitterCallback() {
         const userData = userResponse.data.data;
 
         // 6. Send data to your backend
-        const backendResponse = await axios.post("http://localhost:4000/api/social-sign-in", {
+        const backendResponse = API.post("/social-sign-in", {
           access_token,
           refresh_token,
           twitter_user_data: userData,
