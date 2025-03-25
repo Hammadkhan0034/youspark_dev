@@ -12,48 +12,66 @@ export default function KakaoCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the authorization code from URL
+        // Get the authorization code and state from URL
         const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        const receivedState = params.get('state');
-        
-        // Verify state to prevent CSRF
-        const storedState = localStorage.getItem('kakao_auth_state');
-        if (receivedState !== storedState) {
-          throw new Error('State mismatch - possible CSRF attack');
+        const code = params.get("code");
+        const receivedState = params.get("state");
+
+        // Retrieve stored state from localStorage
+        const storedState = localStorage.getItem("kakao_auth_state");
+
+        if (!storedState || receivedState !== storedState) {
+          throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Send authorization code to backend
-        const response = await API.post('/social-sign-in', {
-          code,
-          channel: 'kakao',
-          redirect_uri: AUTH_CALLBACKS.kakao
+        // Exchange authorization code for Kakao access & refresh tokens
+        const tokenResponse = await fetch("https://kauth.kakao.com/oauth/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: import.meta.env.VITE_KAKAO_CLIENT_ID,
+            redirect_uri: AUTH_CALLBACKS.kakao,
+            code,
+          }),
+        });
+
+        if (!tokenResponse.ok) throw new Error("Failed to fetch access token");
+
+        const tokenData = await tokenResponse.json();
+        const { access_token, refresh_token } = tokenData;
+
+        // Store the access and refresh tokens in localStorage
+        localStorage.setItem("access_token", access_token);
+        if (refresh_token) {
+          localStorage.setItem("refresh_token", refresh_token);
+        }
+
+        // Send the access token to the backend for authentication
+        const response = await API.post("/social-sign-in", {
+          access_token, // Send access token to backend
+          channel: "kakao",
         });
 
         const { data } = response.data;
 
-        // Store tokens
-        localStorage.setItem('access_token', data.access_token);
-        if (data.refresh_token) {
-          localStorage.setItem('refresh_token', data.refresh_token);
-        }
+        // Store user data in Redux
+        dispatch(setUser(data.user));
 
         // Clean up localStorage
-        localStorage.removeItem('kakao_auth_state');
-
-        // Update Redux store
-        dispatch(setUser(data.user));
+        localStorage.removeItem("kakao_auth_state");
 
         // Navigate based on profile completion
         if (!data.user.profile_completed) {
-          navigate('/user-profile');
+          navigate("/user-profile");
         } else {
-          navigate('/home');
+          navigate("/home");
         }
-
       } catch (error) {
-        console.error('Kakao authentication error:', error);
-        navigate('/signin-socials');
+        console.error("Kakao authentication error:", error);
+        navigate("/signin-socials");
       }
     };
 

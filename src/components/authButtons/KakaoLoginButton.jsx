@@ -6,10 +6,10 @@ export default function KakaoLoginButton() {
     try {
       const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
       const redirectUri = encodeURIComponent(AUTH_CALLBACKS.kakao);
-      const state = crypto.randomUUID();
+      const state = crypto.randomUUID(); // Generate random state for CSRF protection
 
       // Store state for CSRF protection
-      localStorage.setItem('kakao_auth_state', state);
+      localStorage.setItem("kakao_auth_state", state);
 
       // Construct Kakao authorization URL
       const authUrl = `https://kauth.kakao.com/oauth/authorize?` +
@@ -18,9 +18,8 @@ export default function KakaoLoginButton() {
         `&response_type=code` +
         `&state=${state}`;
 
-      // Redirect to Kakao Sign-In
+      // Redirect user to Kakao login
       window.location.href = authUrl;
-
     } catch (error) {
       console.error("Error initiating Kakao Sign-In:", error);
     }
