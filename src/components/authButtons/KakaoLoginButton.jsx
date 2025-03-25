@@ -7,7 +7,17 @@ export default function KakaoLoginButton() {
     const redirectUri = encodeURIComponent(`${BASE_URL}/auth/kakao/callback`);
     const responseType = "code";
 
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
+    const state = encodeURIComponent(crypto.randomUUID()); // Generate random state
+    localStorage.setItem('kakao_auth_state', state); // Store state for verification
+
+    const scope = encodeURIComponent('profile_nickname profile_image account_email gender age_range birthday'); // Request necessary permissions
+    
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?` +
+      `client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&response_type=${responseType}` +
+      `&state=${state}` +
+      `&scope=${scope}`;
 
     window.location.href = kakaoAuthUrl;
   };
