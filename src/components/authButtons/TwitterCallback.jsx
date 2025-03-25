@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function TwitterCallback() {
   const navigate = useNavigate();
@@ -22,10 +23,32 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
-        // Send code & code_verifier to backend (Backend will handle token exchange)
-        const response = await API.post("/auth/twitter/callback", {
-          code,
-          code_verifier: codeVerifier,
+        // Exchange the code for an access token
+        const tokenResponse = await fetch("https://api.twitter.com/2/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${btoa(`${process.env.REACT_APP_TWITTER_CLIENT_ID}:${process.env.REACT_APP_TWITTER_CLIENT_SECRET}`)}`,
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            code,
+            redirect_uri: AUTH_CALLBACKS.twitter,
+            code_verifier: codeVerifier,
+            client_id: process.env.REACT_APP_TWITTER_CLIENT_ID,
+          }),
+        });
+
+        const tokenData = await tokenResponse.json();
+
+        if (!tokenData.access_token) {
+          throw new Error("Missing access token");
+        }
+
+        // Send access_token and channel to backend
+        const response = await API.post("/social-sign-in", {
+          access_token: tokenData.access_token,
+          channel: "twitter",
         });
 
         const { data } = response.data;
