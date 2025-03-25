@@ -1,48 +1,63 @@
-import { FaTwitter } from "react-icons/fa";
-import { AUTH_CALLBACKS } from "../../config/urls/urls";
+import { RiTwitterXFill } from "react-icons/ri";
 
 export default function TwitterLoginButton() {
   const handleTwitterLogin = () => {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
-    const redirectUri = encodeURIComponent(AUTH_CALLBACKS.twitter);
+    const redirectUri = encodeURIComponent("http://localhost:3000/auth/twitter/callback");
+    const scope = encodeURIComponent("tweet.read users.read offline.access");
+    const state = crypto.randomUUID(); // Generate random state
+    const codeChallengeMethod = "S256";
     
-    // Generate state using the compatible UUID generator
-    const state = generateUUID();
-    localStorage.setItem("twitter_auth_state", state);
+    // Generate code verifier (43-128 chars)
+    const generateCodeVerifier = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      const length = 96;
+      let result = '';
+      const randomValues = new Uint8Array(length);
+      crypto.getRandomValues(randomValues);
+      randomValues.forEach(v => result += chars[v % chars.length]);
+      return result;
+    };
 
-    // Twitter OAuth 2.0 parameters
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      scope: 'tweet.read users.read',
-      state: state,
-      code_challenge: 'challenge',
-      code_challenge_method: 'plain'
+    const codeVerifier = generateCodeVerifier();
+    
+    // Store code verifier and state in localStorage
+    localStorage.setItem("twitter_code_verifier", codeVerifier);
+    localStorage.setItem("twitter_state", state);
+
+    // Generate code challenge using SHA-256
+    const generateCodeChallenge = async (verifier) => {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(verifier);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    };
+
+    // Initiate OAuth flow
+    generateCodeChallenge(codeVerifier).then(challenge => {
+      const authUrl = `https://twitter.com/i/oauth2/authorize?` +
+        `response_type=code` +
+        `&client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&scope=${scope}` +
+        `&state=${state}` +
+        `&code_challenge=${challenge}` +
+        `&code_challenge_method=${codeChallengeMethod}`;
+
+      window.location.href = authUrl;
     });
-
-    const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?${params.toString()}`;
-    window.location.href = twitterAuthUrl;
   };
 
   return (
     <button
       onClick={handleTwitterLogin}
-      className="flex items-center justify-center px-4 py-2 bg-[#1DA1F2] text-white rounded-lg w-full hover:bg-[#1A91DA] transition-colors"
+      className="flex items-center justify-center px-4 py-2 bg-black text-white rounded-lg w-full hover:bg-gray-800 transition-colors"
     >
-      <FaTwitter className="w-5 h-5 mr-2" />
-      Continue with Twitter
+      <RiTwitterXFill className="w-5 h-5 mr-2" />
+      Continue with X (Twitter)
     </button>
   );
 }
-
-// Fallback UUID Generator (Compatible with all browsers)
-function generateUUID() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
-
