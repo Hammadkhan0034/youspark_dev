@@ -13,15 +13,41 @@ export default function TwitterCallback() {
     const handleCallback = async () => {
       try {
         const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("access_token");
+        const code = params.get("code");
+        const receivedState = params.get("state");
+        const storedState = localStorage.getItem("twitter_state");
+        const codeVerifier = localStorage.getItem("twitter_code_verifier");
 
-        if (!accessToken) {
+        // Verify state
+        if (!storedState || receivedState !== storedState) {
+          throw new Error("State mismatch - possible CSRF attack");
+        }
+
+        // Exchange the code for an access token
+        const tokenResponse = await fetch("https://api.twitter.com/2/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${btoa(`${process.env.REACT_APP_TWITTER_CLIENT_ID}:${process.env.REACT_APP_TWITTER_CLIENT_SECRET}`)}`,
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            code,
+            redirect_uri: AUTH_CALLBACKS.twitter,
+            code_verifier: codeVerifier,
+            client_id: process.env.REACT_APP_TWITTER_CLIENT_ID,
+          }),
+        });
+
+        const tokenData = await tokenResponse.json();
+
+        if (!tokenData.access_token) {
           throw new Error("Missing access token");
         }
 
-        // Send the access_token and channel to your backend
+        // Send access_token and channel to backend
         const response = await API.post("/social-sign-in", {
-          access_token: accessToken,
+          access_token: tokenData.access_token,
           channel: "twitter",
         });
 
@@ -32,6 +58,10 @@ export default function TwitterCallback() {
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
+
+        // Clean up OAuth state
+        localStorage.removeItem("twitter_code_verifier");
+        localStorage.removeItem("twitter_state");
 
         // Create user object from response
         const userData = {
@@ -51,6 +81,8 @@ export default function TwitterCallback() {
         navigate(data.first_login ? "/user-profile" : "/home");
       } catch (error) {
         console.error("Twitter authentication error:", error);
+        localStorage.removeItem("twitter_code_verifier");
+        localStorage.removeItem("twitter_state");
         navigate("/signin-socials");
       }
     };
