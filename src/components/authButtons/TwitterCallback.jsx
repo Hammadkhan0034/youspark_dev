@@ -23,6 +23,10 @@ export default function TwitterCallback() {
           throw new Error("State mismatch - possible CSRF attack");
         }
 
+        // Store code and codeVerifier in localStorage before making the request
+        localStorage.setItem("twitter_code", code);
+        localStorage.setItem("twitter_code_verifier", codeVerifier);
+
         // Send the code and code_verifier to your backend
         const response = await API.post("/social-sign-in", {
           code,
@@ -39,7 +43,6 @@ export default function TwitterCallback() {
         }
 
         // Clean up OAuth state
-        localStorage.removeItem("twitter_code_verifier");
         localStorage.removeItem("twitter_state");
 
         // Create user object from response
@@ -61,6 +64,7 @@ export default function TwitterCallback() {
 
       } catch (error) {
         console.error("Twitter authentication error:", error);
+        localStorage.removeItem("twitter_code");
         localStorage.removeItem("twitter_code_verifier");
         localStorage.removeItem("twitter_state");
         navigate("/signin-socials");
