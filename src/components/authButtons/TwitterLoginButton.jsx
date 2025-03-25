@@ -5,19 +5,23 @@ export default function TwitterLoginButton() {
   const handleTwitterLogin = () => {
     const clientId = import.meta.env.VITE_TWITTER_CLIENT_ID;
     const redirectUri = encodeURIComponent(AUTH_CALLBACKS.twitter);
-    const scope = encodeURIComponent("tweet.read users.read offline.access");
-    const state = generateUUID();
     
-    // Store state for CSRF protection
+    // Generate state
+    const state = crypto.randomUUID();
     localStorage.setItem("twitter_auth_state", state);
 
-    const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?` +
-      `response_type=token` +
-      `&client_id=${clientId}` +
-      `&redirect_uri=${redirectUri}` +
-      `&scope=${scope}` +
-      `&state=${state}`;
+    // Twitter OAuth 2.0 parameters
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      scope: 'tweet.read users.read',
+      state: state,
+      code_challenge: 'challenge', // Add PKCE support if needed
+      code_challenge_method: 'plain'
+    });
 
+    const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?${params.toString()}`;
     window.location.href = twitterAuthUrl;
   };
 
@@ -32,11 +36,4 @@ export default function TwitterLoginButton() {
   );
 }
 
-// UUID Generator for state parameter
-function generateUUID() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+

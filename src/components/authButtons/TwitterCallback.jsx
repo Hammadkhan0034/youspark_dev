@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
-import { BASE_URL } from "../../config/urls/urls";
+import axios from "axios";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function TwitterCallback() {
   const navigate = useNavigate();
@@ -11,60 +12,64 @@ export default function TwitterCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const hash = window.location.hash;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+        const receivedState = params.get("state");
+        const storedState = localStorage.getItem("twitter_auth_state");
 
-      if (hash) {
-        const params = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get("access_token");
-
-        if (accessToken) {
-          try {
-            const response = await API.post("/social-sign-in", {
-              access_token: accessToken,
-              channel: "twitter"
-            });
-
-            const { data } = response.data;
-
-            // Store tokens
-            localStorage.setItem("access_token", data.access_token);
-            if (data.refresh_token) {
-              localStorage.setItem("refresh_token", data.refresh_token);
-            }
-
-            // Create user object from response
-            const userData = {
-              id: data.id,
-              email: data.email,
-              username: data.user_name,
-              userStatus: data.user_status,
-              userImage: data.user_image,
-              firstLogin: data.first_login,
-              appName: data.app_name
-            };
-
-            // Update Redux store
-            dispatch(setUser(userData));
-
-            // Clear the hash from URL
-            window.history.replaceState(null, null, window.location.pathname);
-
-            // Navigate based on first_login flag
-            if (data.first_login) {
-              navigate("/user-profile");
-            } else {
-              navigate("/home");
-            }
-          } catch (error) {
-            console.error("Error during Twitter authentication:", error);
-            navigate("/signin-socials");
-          }
-        } else {
-          console.error("No access token found in URL hash");
-          navigate("/signin-socials");
+        // Verify state
+        if (!storedState || receivedState !== storedState) {
+          throw new Error("State mismatch - possible CSRF attack");
         }
-      } else {
-        console.error("No hash found in URL");
+
+        // Exchange code for token
+        const tokenResponse = await axios.post(
+          "https://api.twitter.com/2/oauth2/token",
+          new URLSearchParams({
+            code: code,
+            grant_type: "authorization_code",
+            client_id: import.meta.env.VITE_TWITTER_CLIENT_ID,
+            redirect_uri: AUTH_CALLBACKS.twitter,
+            code_verifier: "challenge" // Should match the challenge from login
+          }),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Basic ${btoa(
+                `${import.meta.env.VITE_TWITTER_CLIENT_ID}:${import.meta.env.VITE_TWITTER_CLIENT_SECRET}`
+              )}`
+            }
+          }
+        );
+
+        const { access_token } = tokenResponse.data;
+
+        // Send to your backend
+        const response = await API.post("/social-sign-in", {
+          access_token,
+          channel: "twitter"
+        });
+
+        const { data } = response.data;
+
+        // Store tokens
+        localStorage.setItem("access_token", data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem("refresh_token", data.refresh_token);
+        }
+
+        // Clean up
+        localStorage.removeItem("twitter_auth_state");
+
+        // Update Redux store
+        dispatch(setUser(data));
+
+        // Navigate based on first login
+        navigate(data.first_login ? "/user-profile" : "/home");
+
+      } catch (error) {
+        console.error("Twitter authentication error:", error);
         navigate("/signin-socials");
       }
     };
