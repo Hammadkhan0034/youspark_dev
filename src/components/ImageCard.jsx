@@ -47,7 +47,7 @@ const ImageCard = () => {
         {/* Profile Title */}
         <div className="text-center bg-black bg-opacity-30 p-4 rounded-lg">
           <h2 className="text-2xl font-bold mb-1">{nickname || "User"}</h2>
-          <p className="text-sm text-yellow-300">@{first_name || "N/A"}</p>
+          {/* <p className="text-sm text-yellow-300">@{first_name || "N/A"}</p> */}
         </div>
 
         {/* Description */}
