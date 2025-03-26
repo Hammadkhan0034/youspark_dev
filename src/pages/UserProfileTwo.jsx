@@ -30,7 +30,7 @@ const MultiStepForm = () => {
 
   // Load data from local storage when component mounts
   useEffect(() => {
-    const savedFormData = localStorage.getItem("multiStepFormData");
+    const savedFormData = localStorage.getItem("userProfileFormData");
     if (savedFormData) {
       setFormData(JSON.parse(savedFormData));
     }
@@ -49,7 +49,7 @@ const MultiStepForm = () => {
 
   // Save data to local storage whenever formData changes
   useEffect(() => {
-    localStorage.setItem("multiStepFormData", JSON.stringify(formData));
+    localStorage.setItem("userProfileFormData", JSON.stringify(formData));
   }, [formData]);
 
   const validateNickname = (nickname) => {
@@ -189,8 +189,9 @@ const MultiStepForm = () => {
       ).unwrap();
 
       if (result.data) {
+        // Clear form data from local storage only on successful submission
+        localStorage.removeItem("userProfileFormData");
         navigate("/home", { replace: true });
-        localStorage.removeItem("multiStepFormData");
       }
     } catch (error) {
       console.error("Profile update failed:", error);
