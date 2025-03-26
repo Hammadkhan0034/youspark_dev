@@ -38,11 +38,17 @@ export default function DiscordCallback() {
               id: data.id || '',
               email: data.email || '',
               username: data.user_name || '',
+              nickname: data.nickname || '',
+              birth_date: data.birth_date || '',
+              gender: data.gender || '',
+              country: data.country || '',
+              region: data.region || '',
+              city: data.city || '',
               userStatus: data.user_status || '',
-              userImage: data.user_image || '',
               firstLogin: data.first_login || false,
               appName: data.app_name || '',
-              profile_completed: data.profile_completed || false
+              // Don't trust the backend's profile_completed flag
+              profile_completed: false
             };
 
             // Store user profile as JSON string
@@ -54,12 +60,19 @@ export default function DiscordCallback() {
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Use the new profile page route and check profile completion
-            if (data.first_login || !userProfile.profile_completed || !userProfile.username) {
-              navigate("/user-profile", { replace: true }); // Updated to use new profile page
+            // Check if required fields are filled
+            const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+            const isProfileComplete = requiredFields.every(field => 
+              userProfile[field] && userProfile[field].trim() !== ''
+            );
+
+            // Always redirect to profile page if any required field is missing
+            if (!isProfileComplete) {
+              navigate("/user-profile", { replace: true });
             } else {
               navigate("/home", { replace: true });
             }
+
           } catch (error) {
             console.error("Error during Discord authentication:", error);
             localStorage.removeItem("user_profile");

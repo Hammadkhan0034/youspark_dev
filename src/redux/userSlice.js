@@ -1,6 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../api/api";
 
+const isProfileComplete = (profile) => {
+  const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+  return requiredFields.every(field => profile[field] && profile[field].trim() !== '');
+};
+
 // Async Thunk for updating user profile with better error handling
 export const updateUserProfile = createAsyncThunk(
   "user/updateProfile",
@@ -17,15 +22,15 @@ export const updateUserProfile = createAsyncThunk(
         throw new Error("No data returned from server");
       }
 
-      const completeProfile = {
+      const profileData = {
         ...response.data,
-        profile_completed: true
+        profile_completed: isProfileComplete(response.data)
       };
 
       // Store complete profile in localStorage
-      localStorage.setItem("user_profile", JSON.stringify(completeProfile));
+      localStorage.setItem("user_profile", JSON.stringify(profileData));
 
-      return completeProfile;
+      return profileData;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
                          error.message || 
@@ -60,7 +65,14 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload;
+      const userData = action.payload;
+      // Override profile_completed based on actual field values
+      const actuallyComplete = isProfileComplete(userData);
+      
+      state.user = {
+        ...userData,
+        profile_completed: actuallyComplete
+      };
       state.isAuthenticated = true;
       state.error = null;
     },
