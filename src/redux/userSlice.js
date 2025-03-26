@@ -11,20 +11,22 @@ export const updateUserProfile = createAsyncThunk(
         return rejectWithValue("No authentication token found");
       }
 
-      const response = await API.put("/users/update-profile", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await API.put("/users/update-profile", formData);
 
       if (!response.data) {
         throw new Error("No data returned from server");
       }
 
-      return response.data;
+      const completeProfile = {
+        ...response.data,
+        profile_completed: true
+      };
+
+      // Store complete profile in localStorage
+      localStorage.setItem("user_profile", JSON.stringify(completeProfile));
+
+      return completeProfile;
     } catch (error) {
-      // Handle different error formats
       const errorMessage = error.response?.data?.message || 
                          error.message || 
                          "Failed to update profile";

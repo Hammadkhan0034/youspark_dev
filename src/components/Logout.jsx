@@ -9,13 +9,13 @@ const Logout = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // Clear all relevant data from local storage
+    // Clear all stored data
     const itemsToClear = [
       'access_token',
       'refresh_token',
+      'user_profile',
       'userProfileFormData',
-      'multiStepFormData',
-      'user'
+      'multiStepFormData'
     ];
 
     itemsToClear.forEach(item => {

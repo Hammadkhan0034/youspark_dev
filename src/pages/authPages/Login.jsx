@@ -32,39 +32,37 @@ const Login = () => {
       const response = await API.post("/sign-in", formData);
       const userData = response.data.data;
 
-      // Store access and refresh tokens in local storage
+      // Store tokens
       localStorage.setItem("access_token", userData.access_token);
       localStorage.setItem("refresh_token", userData.refresh_token);
       
+      // Store user profile data
+      const userProfile = {
+        id: userData.id,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        email: userData.email,
+        username: userData.user_name,
+        nickname: userData.nickname,
+        city: userData.city,
+        country: userData.country,
+        region: userData.region,
+        birthDate: userData.birth_date,
+        gender: userData.gender,
+        location: userData.location,
+        profileUpdated: userData.profile_updated,
+      };
 
-      // Dispatch user details to Redux store
-      dispatch(
-        setUser({
-          id: userData.id,
-          firstName: userData.first_name,
-          lastName: userData.last_name,
-          email: userData.email,
-          username: userData.user_name,
-          nickname: userData.nickname,
-          city: userData.city,
-          country: userData.country,
-          region: userData.region,
-          birthDate: userData.birth_date,
-          gender: userData.gender,
-          location: userData.location,
-          profileUpdated: userData.profile_updated,
-        })
-      );
+      // Store in localStorage and Redux
+      localStorage.setItem("user_profile", JSON.stringify(userProfile));
+      dispatch(setUser(userProfile));
 
-      console.log("Login Successful:", userData);
-       // Navigate based on profile_completed
-       if (response.data.data.profile_completed === false) {
+      // Navigate based on profile completion
+      if (!userData.profile_completed) {
         navigate("/user-profile");
       } else {
         navigate("/home");
       }
-
-    
     } catch (error) {
       console.error("Login error:", error);
       setError(error.response?.data?.message || "Invalid credentials");

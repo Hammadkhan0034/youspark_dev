@@ -47,14 +47,14 @@ export default function KakaoCallback() {
 
         const { data } = response.data;
 
-        // Store access & refresh tokens
+        // Store tokens
         localStorage.setItem("access_token", data.access_token);
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Create user object from response
-        const userData = {
+        // Create and store user profile
+        const userProfile = {
           id: data.id,
           email: data.email,
           username: data.user_name,
@@ -62,16 +62,15 @@ export default function KakaoCallback() {
           userImage: data.user_image,
           firstLogin: data.first_login,
           appName: data.app_name,
+          profile_completed: !data.first_login // Set to true if not first login
         };
 
-        // Update Redux store with user data
-        dispatch(setUser(userData));
+        // Store in localStorage and Redux
+        localStorage.setItem("user_profile", JSON.stringify(userProfile));
+        dispatch(setUser(userProfile));
 
-        // Clean up
-        localStorage.removeItem("kakao_auth_state");
-
-        // Navigate based on first login
-        navigate(data.first_login ? "/user-profile" : "/home");
+        // Navigate based on profile completion
+        navigate(userProfile.profile_completed ? "/home" : "/user-profile");
       } catch (error) {
         console.error("Kakao authentication error:", error);
         navigate("/signin-socials");

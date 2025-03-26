@@ -1,20 +1,16 @@
-// /api/api.js
-import axios from "axios";
+import axios from 'axios';
 
 const API = axios.create({
-  baseURL: "http://ec2-54-167-153-121.compute-1.amazonaws.com:4000/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
 });
 
 // Request interceptor
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("access_token");
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
   if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return req;
+  return config;
 });
 
 // Response interceptor
@@ -28,29 +24,27 @@ API.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Try to refresh the token
-        const refreshToken = localStorage.getItem("refresh_token");
+        const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post("http://ec2-54-167-153-121.compute-1.amazonaws.com:4000/api/auth/refresh", {
-            refresh_token: refreshToken
-          });
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/auth/refresh`,
+            { refresh_token: refreshToken }
+          );
 
           const { access_token } = response.data;
-          localStorage.setItem("access_token", access_token);
+          localStorage.setItem('access_token', access_token);
 
           // Update the Authorization header
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          return axios(originalRequest);
+          return API(originalRequest);
         }
       } catch (refreshError) {
-        // Only clear storage if refresh token is invalid
-        if (refreshError.response?.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          window.location.href = "/signin-socials";
-        }
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/signin-socials';
       }
     }
+
     return Promise.reject(error);
   }
 );

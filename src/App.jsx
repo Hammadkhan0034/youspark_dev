@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { setUser } from './redux/userSlice';
 import API from './api/api';
 import './App.css';
@@ -20,39 +20,56 @@ import KakaoCallback from './components/authButtons/KakaoCallback';
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.user);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem('access_token');
+      const storedProfile = localStorage.getItem('user_profile');
 
-      if (token && !isAuthenticated) {
+      if (token && storedProfile) {
         try {
-          const response = await API.get('/users/me');
-          dispatch(setUser(response.data.data));
+          const userProfile = JSON.parse(storedProfile);
+          dispatch(setUser(userProfile));
         } catch (error) {
-          // Only remove tokens if it's an authentication error
-          if (error.response?.status === 401) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-          }
-          // For other errors, keep the tokens
-          console.error('Error fetching user data:', error);
+          console.error('Error parsing stored profile:', error);
         }
       }
+      setIsLoading(false);
     };
 
     checkAuthStatus();
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600"></div>
+      </div>
+    );
+  }
 
   // Protected Route Component
   const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('access_token');
-
-    if (!token || !isAuthenticated) {
+    const storedProfile = localStorage.getItem('user_profile');
+    
+    if (!token) {
       return <Navigate to="/signin-socials" replace />;
     }
 
-    if (isAuthenticated && !user?.profile_completed) {
+    // Check if profile exists in localStorage and is completed
+    if (!storedProfile) {
+      return <Navigate to="/user-profile" replace />;
+    }
+
+    try {
+      const userProfile = JSON.parse(storedProfile);
+      if (!userProfile.profile_completed) {
+        return <Navigate to="/user-profile" replace />;
+      }
+    } catch (error) {
+      console.error('Error parsing stored profile:', error);
       return <Navigate to="/user-profile" replace />;
     }
 
@@ -62,13 +79,22 @@ function App() {
   // Profile Route Component
   const ProfileRoute = ({ children }) => {
     const token = localStorage.getItem('access_token');
+    const storedProfile = localStorage.getItem('user_profile');
 
-    if (!token || !isAuthenticated) {
+    if (!token) {
       return <Navigate to="/signin-socials" replace />;
     }
 
-    if (isAuthenticated && user?.profile_completed) {
-      return <Navigate to="/home" replace />;
+    // If profile exists and is completed, redirect to home
+    if (storedProfile) {
+      try {
+        const userProfile = JSON.parse(storedProfile);
+        if (userProfile.profile_completed) {
+          return <Navigate to="/home" replace />;
+        }
+      } catch (error) {
+        console.error('Error parsing stored profile:', error);
+      }
     }
 
     return children;

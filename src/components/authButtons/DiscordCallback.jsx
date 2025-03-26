@@ -22,7 +22,7 @@ export default function DiscordCallback() {
             const response = await API.post("/social-sign-in", {
               access_token: accessToken,
               channel: "discord",
-              redirect_uri: `${BASE_URL}/auth/discord/callback` // Include redirect_uri
+              redirect_uri: `${BASE_URL}/auth/discord/callback`
             });
 
             const { data } = response.data;
@@ -39,24 +39,17 @@ export default function DiscordCallback() {
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Navigate based on profile completion
-            if (!data.user.profile_completed) {
-              navigate("/user-profile");
-            } else {
-              navigate("/home");
-            }
-            
+            // Always navigate to home after successful social login
+            navigate("/home", { replace: true });
           } catch (error) {
             console.error("Error during Discord authentication:", error);
-            navigate("/signin-socials");
+            navigate("/signin-socials", { replace: true });
           }
         } else {
-          console.error("No access token found in URL hash");
-          navigate("/signin-socials");
+          navigate("/signin-socials", { replace: true });
         }
       } else {
-        console.error("No hash found in URL");
-        navigate("/signin-socials");
+        navigate("/signin-socials", { replace: true });
       }
     };
 
@@ -65,7 +58,7 @@ export default function DiscordCallback() {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600"></div>
     </div>
   );
 }

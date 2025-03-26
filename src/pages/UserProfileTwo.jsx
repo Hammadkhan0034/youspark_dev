@@ -180,17 +180,30 @@ const MultiStepForm = () => {
       const locationError = validateLocation();
       if (locationError) {
         setErrors({ location: locationError });
-        setStep(4); // Return to location step if invalid
+        setStep(4);
         return;
       }
 
+      const completeProfile = {
+        ...formData,
+        profile_completed: true
+      };
+
       const result = await dispatch(
-        updateUserProfile({ ...formData, profile_completed: true })
+        updateUserProfile(completeProfile)
       ).unwrap();
 
-      if (result.data) {
-        // Clear form data from local storage only on successful submission
+      if (result) {
+        // Store the completed profile in localStorage
+        localStorage.setItem("user_profile", JSON.stringify({
+          ...result,
+          profile_completed: true
+        }));
+        
+        // Clear form data from local storage
         localStorage.removeItem("userProfileFormData");
+        
+        // Navigate to home
         navigate("/home", { replace: true });
       }
     } catch (error) {
