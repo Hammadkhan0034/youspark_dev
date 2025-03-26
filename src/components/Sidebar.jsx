@@ -60,7 +60,7 @@ const Sidebar = ({ isSidebarOpen }) => {
           <SidebarItem
             icon={<User className="text-teal-dark" />}
             text={t('profile')}
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/user-profile")}
             showText={isSidebarOpen}
           />
 

@@ -135,8 +135,10 @@ function App() {
         {/* Auth Callback Routes */}
         <Route path="/auth/discord/callback" element={<DiscordCallback />} />
         <Route path="/auth/twitter/callback" element={<TwitterCallback />} />
+        <Route path="/auth/apple/callback" element={<AppleCallback />} />
+        <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
-        {/* Profile Setup Route */}
+        {/* Profile Setup Route - Use UserProfileTwo for all profile setups */}
         <Route
           path="/user-profile"
           element={

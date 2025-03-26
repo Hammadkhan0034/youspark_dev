@@ -42,7 +42,7 @@ export default function DiscordCallback() {
               userImage: data.user_image || '',
               firstLogin: data.first_login || false,
               appName: data.app_name || '',
-              profile_completed: !data.first_login // Set to true if not first login
+              profile_completed: data.profile_completed || false
             };
 
             // Store user profile as JSON string
@@ -54,11 +54,14 @@ export default function DiscordCallback() {
             // Clear the hash from URL
             window.history.replaceState(null, null, window.location.pathname);
 
-            // Navigate based on profile completion
-            navigate(userProfile.profile_completed ? "/home" : "/user-profile", { replace: true });
+            // Use the new profile page route and check profile completion
+            if (data.first_login || !userProfile.profile_completed || !userProfile.username) {
+              navigate("/user-profile", { replace: true }); // Updated to use new profile page
+            } else {
+              navigate("/home", { replace: true });
+            }
           } catch (error) {
             console.error("Error during Discord authentication:", error);
-            // Clear any potentially corrupted data
             localStorage.removeItem("user_profile");
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
