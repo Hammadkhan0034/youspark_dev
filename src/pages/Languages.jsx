@@ -28,32 +28,32 @@ const Languages = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b border-gray-200 p-4 flex items-center">
+      <div className="border-b border-teal-light/20 p-4 flex items-center bg-white sticky top-0 z-10">
         <button 
           onClick={() => navigate(-1)} 
-          className="p-2 hover:bg-gray-100 rounded-full"
+          className="p-2 hover:bg-teal-light/10 rounded-full transition-colors"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} className="text-teal-dark" />
         </button>
-        <h1 className="text-xl font-bold ml-4">{t('language')}</h1>
+        <h1 className="text-xl font-bold ml-4 text-teal-dark">{t('language')}</h1>
       </div>
 
       {/* Language Settings */}
-      <div className="p-4">
+      <div className="p-4 max-w-2xl mx-auto">
         <div className="space-y-2">
           {languages.map((language) => (
             <button
               key={language.code}
               onClick={() => changeLanguage(language.code)}
-              className={`w-full text-left p-4 rounded-lg flex items-center justify-between ${
+              className={`w-full text-left p-4 rounded-lg flex items-center justify-between transition-all duration-200 ${
                 i18n.language === language.code 
-                  ? 'bg-blue-50 text-blue-600' 
+                  ? 'bg-teal-light/10 text-teal-dark font-medium' 
                   : 'hover:bg-gray-50'
               }`}
             >
               <span>{language.name}</span>
               {i18n.language === language.code && (
-                <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                <div className="w-3 h-3 rounded-full bg-teal-dark"></div>
               )}
             </button>
           ))}
