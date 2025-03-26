@@ -101,7 +101,7 @@ function Home() {
                   rows={3}
                 />
                 <div className="flex justify-end mt-2">
-                  <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-bold transition-colors">
+                  <button className="bg-teal-dark hover:bg-teal-light text-white px-6 py-2 rounded-full font-bold transition-colors">
                     {t('post')}
                   </button>
                 </div>
@@ -124,19 +124,19 @@ function Home() {
                     </div>
                     <p className="mt-2 mb-4">{tweet.content}</p>
                     <div className="flex justify-between text-gray-500 max-w-md">
-                      <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                      <button className="flex items-center space-x-2 hover:text-teal-dark transition-colors">
                         <MessageSquare size={18} />
                         <span>{tweet.comments} {t('comment')}</span>
                       </button>
-                      <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
+                      <button className="flex items-center space-x-2 hover:text-teal-dark transition-colors">
                         <Repeat2 size={18} />
                         <span>{tweet.retweets} {t('retweet')}</span>
                       </button>
-                      <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
+                      <button className="flex items-center space-x-2 hover:text-teal-dark transition-colors">
                         <Heart size={18} />
                         <span>{tweet.likes} {t('like')}</span>
                       </button>
-                      <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                      <button className="flex items-center space-x-2 hover:text-teal-dark transition-colors">
                         <Share size={18} />
                         <span>{t('share')}</span>
                       </button>
@@ -152,7 +152,7 @@ function Home() {
         <RightSidebar trendingTopics={trendingTopics} />
 
         {/* Mobile Bottom Navigation */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-teal-light/20 px-6 py-2">
           <div className="flex justify-between items-center">
             <MobileNavButton icon={<HomeIcon size={24} />} onClick={() => navigate("/home")} />
             <MobileNavButton icon={<User size={24} />} text="SparkZone" onClick={() => navigate("/sparkzone")}/>

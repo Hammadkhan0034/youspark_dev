@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
-import userBG from "../../src/assets/userBG.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../redux/userSlice";
 import Sidebar from "../components/SidebarTwo";
-import DefaultImg from "../assets/default.png"
-
 
 const MultiStepForm = () => {
   const { user } = useSelector((state) => state.user);
@@ -16,74 +13,162 @@ const MultiStepForm = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    // first_name: "", // Add first name
-    // last_name: "",  // Add last name
     nickname: user?.nickname || "",
     birth_date: "",
     gender: "",
     country: "",
     region: "",
     city: "",
-    location: '',
+    
   });
 
-
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState(null);
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [cities, setCities] = useState([]);
-  const [profileImage, setProfileImage] = useState(null);
 
   // Load data from local storage when component mounts
   useEffect(() => {
-    const savedFormData = localStorage.getItem("formData");
+    const savedFormData = localStorage.getItem("multiStepFormData");
     if (savedFormData) {
       setFormData(JSON.parse(savedFormData));
     }
-  }, []);
 
-  // Save data to local storage whenever formData changes
-  useEffect(() => {
-    localStorage.setItem("formData", JSON.stringify(formData));
-  }, [formData]);
-
-  useEffect(() => {
+    // Load countries
     axios.get("https://restcountries.com/v3.1/all").then((response) => {
-      const countryData = response.data.map((country) => ({
-        name: country.name.common,
-        code: country.cca2,
-      }));
+      const countryData = response.data
+        .map((country) => ({
+          name: country.name.common,
+          code: country.cca2,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
       setCountries(countryData);
     });
   }, []);
 
+  // Save data to local storage whenever formData changes
+  useEffect(() => {
+    localStorage.setItem("multiStepFormData", JSON.stringify(formData));
+  }, [formData]);
+
+  const validateNickname = (nickname) => {
+    if (!nickname || nickname.trim() === "") {
+      return "Nickname is required";
+    }
+    if (nickname.length < 3) {
+      return "Nickname must be at least 3 characters";
+    }
+    return null;
+  };
+
+  const validateBirthDate = (birthDate) => {
+    if (!birthDate) {
+      return "Birth date is required";
+    }
+    
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    if (age < 16) {
+      return "You must be at least 16 years old";
+    }
+    return null;
+  };
+
+  const validateLocation = () => {
+    if (!formData.country) return "Please select a country";
+    if (!formData.region) return "Please select a region/state";
+    if (!formData.city) return "Please select a city";
+    return null;
+  };
+
+  const handleNext = () => {
+    let error = null;
+    
+    switch (step) {
+      case 1:
+        error = validateNickname(formData.nickname);
+        if (error) {
+          setErrors({ nickname: error });
+          return;
+        }
+        break;
+      case 2:
+        error = validateBirthDate(formData.birth_date);
+        if (error) {
+          setErrors({ birth_date: error });
+          return;
+        }
+        break;
+      case 3:
+        if (!formData.gender) {
+          setErrors({ gender: "Gender is required" });
+          return;
+        }
+        break;
+      case 4:
+        error = validateLocation();
+        if (error) {
+          setErrors({ location: error });
+          return;
+        }
+        break;
+    }
+    
+    setErrors({});
+    setStep(step + 1);
+  };
+
   const handleChange = (e) => {
-    const newFormData = { ...formData, [e.target.name]: e.target.value };
-    setFormData(newFormData);
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCountryChange = async (e) => {
     const countryName = e.target.value;
-    const newFormData = { ...formData, country: countryName, region: "", city: "" };
-    setFormData(newFormData);
-    const response = await axios.post("https://countriesnow.space/api/v0.1/countries/states", { country: countryName });
-    setRegions(response.data.data.states || []);
-    setCities([]);
+    setFormData(prev => ({ ...prev, country: countryName, region: "", city: "" }));
+    
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/states", 
+        { country: countryName }
+      );
+      setRegions(response.data.data?.states || []);
+      setCities([]);
+    } catch (error) {
+      console.error("Failed to fetch regions:", error);
+      setRegions([]);
+      setCities([]);
+    }
   };
 
   const handleRegionChange = async (e) => {
     const regionName = e.target.value;
-    const newFormData = { ...formData, region: regionName, city: "" };
-    setFormData(newFormData);
-    const response = await axios.post("https://countriesnow.space/api/v0.1/countries/state/cities", {
-      country: formData.country,
-      state: regionName,
-    });
-    setCities(response.data.data || []);
+    setFormData(prev => ({ ...prev, region: regionName, city: "" }));
+    
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        { country: formData.country, state: regionName }
+      );
+      setCities(response.data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch cities:", error);
+      setCities([]);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setSubmitError(null);
+
     try {
       const token = localStorage.getItem("access_token");
       if (!token) {
@@ -91,32 +176,27 @@ const MultiStepForm = () => {
         return;
       }
 
-      const result = await dispatch(updateUserProfile({
-        ...formData,
-        profile_completed: true
-      })).unwrap();
-
-      // Show success message or handle the success case
-      if (result.data) {
-        // Don't remove formData here
-        // Only navigate to home
-        navigate("/home");
+      // Final validation before submission
+      const locationError = validateLocation();
+      if (locationError) {
+        setErrors({ location: locationError });
+        setStep(4); // Return to location step if invalid
+        return;
       }
 
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      // Handle error (show error message to user)
-    }
-  };
+      const result = await dispatch(
+        updateUserProfile({ ...formData, profile_completed: true })
+      ).unwrap();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      if (result.data) {
+        navigate("/home", { replace: true });
+        localStorage.removeItem("multiStepFormData");
+      }
+    } catch (error) {
+      console.error("Profile update failed:", error);
+      setSubmitError(
+        error.message || "Failed to update profile. Please try again."
+      );
     }
   };
 
@@ -126,171 +206,196 @@ const MultiStepForm = () => {
     }
   };
 
-  // Add success message component
-  const SuccessMessage = () => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg">
-      Profile updated successfully!
-    </div>
-  );
-
   return (
-    <div
-      className="relative w-full min-h-screen bg-cover bg-center bg-blue-300 flex items-center justify-center"
-      style={{
-        width: "100vw",
-        height: "100vh",
-        opacity: "0.9"
-      }}
-    >
-      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden" style={{ width: "50%" }}>
+    <div className="min-h-screen bg-[#81D8D0] flex items-center justify-center p-4">
+      <div className="flex bg-white bg-opacity-90 rounded-lg shadow-2xl overflow-hidden w-full max-w-4xl">
         <Sidebar step={step} />
         <div className="p-8 flex-1">
-          {step === 1 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Profile Image</h2>
-
-              <div className="relative w-32 h-32 mx-auto mb-6">
-                {/* Image Container */}
-                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-blue-200">
-                  <img
-                    src={profileImage || DefaultImg} // Default image path
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Pencil Icon */}
-                <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                  </svg>
-                </label>
-
-                {/* Hidden File Input */}
-                <input
-                  type="file"
-                  id="profileImage"
-                  name="profileImage"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-6">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(2)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
-              </div>
+          {submitError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+              {submitError}
             </div>
           )}
-          {step === 2 && (
+
+          {/* Step 1: Nickname */}
+          {step === 1 && (
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Personal Information</h2>
-
-              {/* <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="First Name"
-                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Last Name"
-                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
-              /> */}
-
+              <h2 className="text-2xl font-bold mb-6 text-[#0ABAB5]">Nickname</h2>
               <input
                 type="text"
                 name="nickname"
                 value={formData.nickname}
                 onChange={handleChange}
-                placeholder="Nickname"
-                className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none"
+                placeholder="Enter your nickname"
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none"
               />
-              <div className="flex justify-between mt-6">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(3)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+              {errors.nickname && (
+                <p className="text-red-500 mt-2">{errors.nickname}</p>
+              )}
+              <div className="flex justify-end mt-6">
+                <button 
+                  onClick={handleNext} 
+                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
+
+          {/* Step 2: Birthday */}
+          {step === 2 && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-[#0ABAB5]">Birthday</h2>
+              <input 
+                type="date" 
+                name="birth_date" 
+                value={formData.birth_date} 
+                onChange={handleChange} 
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none" 
+              />
+              {errors.birth_date && (
+                <p className="text-red-500 mt-2">{errors.birth_date}</p>
+              )}
+              <div className="flex justify-between mt-6">
+                <button 
+                  onClick={handleBack} 
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                >
+                  Back
+                </button>
+                <button 
+                  onClick={handleNext} 
+                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Gender */}
           {step === 3 && (
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Birthday</h2>
-              <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" />
+              <h2 className="text-2xl font-bold mb-6 text-[#0ABAB5]">Gender</h2>
+              <select
+                name="gender"
+                value={formData.gender || ""}
+                onChange={handleChange}
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none mb-4"
+              >
+                <option value="" disabled>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              {errors.gender && (
+                <p className="text-red-500 mt-2">{errors.gender}</p>
+              )}
               <div className="flex justify-between mt-6">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(4)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+                <button 
+                  onClick={handleBack} 
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                >
+                  Back
+                </button>
+                <button 
+                  onClick={handleNext} 
+                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
+
+          {/* Step 4: Location */}
           {step === 4 && (
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Gender</h2>
-              <div className="mb-6">
-                <select
-                  value={formData.gender || ""}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4"
-                >
-                  <option value="" disabled>Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Non-Binary">Non-Binary</option>
-                </select>
-              </div>
-              <div className="flex justify-between mt-6">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(5)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600" disabled={!formData.gender}>Next</button>
-              </div>
-            </div>
-          )}
-          {step === 5 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Location</h2>
-              <select name="country" value={formData.country} onChange={handleCountryChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4">
+              <h2 className="text-2xl font-bold mb-6 text-[#0ABAB5]">Location</h2>
+              {errors.location && (
+                <p className="text-red-500 mb-4">{errors.location}</p>
+              )}
+              
+              <select 
+                name="country" 
+                value={formData.country} 
+                onChange={handleCountryChange} 
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none mb-4"
+              >
                 <option value="">Select Country</option>
-                {countries.map((c) => (<option key={c.code} value={c.name}>{c.name}</option>))}
+                {countries.map((c) => (
+                  <option key={c.code} value={c.name}>{c.name}</option>
+                ))}
               </select>
-              <select name="region" value={formData.region} onChange={handleRegionChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none mb-4" disabled={!regions.length}>
-                <option value="">Select Region</option>
-                {regions.map((r, i) => (<option key={i} value={r.name}>{r.name}</option>))}
+              
+              <select 
+                name="region" 
+                value={formData.region} 
+                onChange={handleRegionChange} 
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none mb-4" 
+                disabled={!formData.country}
+              >
+                <option value="">Select Region/State</option>
+                {regions.map((r, i) => (
+                  <option key={i} value={r.name}>{r.name}</option>
+                ))}
               </select>
-              <select name="city" value={formData.city} onChange={handleChange} className="border-2 border-blue-200 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none" disabled={!cities.length}>
+              
+              <select 
+                name="city" 
+                value={formData.city} 
+                onChange={handleChange} 
+                className="border-2 border-[#81D8D0] p-3 w-full rounded-lg focus:border-[#0ABAB5] focus:outline-none" 
+                disabled={!formData.region}
+              >
                 <option value="">Select City</option>
-                {cities.map((c, i) => (<option key={i} value={c}>{c}</option>))}
+                {cities.map((c, i) => (
+                  <option key={i} value={c}>{c}</option>
+                ))}
               </select>
-
-              <input className="border-2 border-blue-200 p-3 mt-4 w-full rounded-lg focus:border-blue-500 focus:outline-none"
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Location"
-              />
-
+              
               <div className="flex justify-between mt-6">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={() => setStep(6)} className="bg-blue-500 text-white p-2 rounded-lg w-24 hover:bg-blue-600">Next</button>
+                <button 
+                  onClick={handleBack} 
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                >
+                  Back
+                </button>
+                <button 
+                  onClick={handleNext} 
+                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
-          {step === 6 && (
+
+          {/* Step 5: Summary */}
+          {step === 5 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold mb-6 text-blue-800">Summary</h2>
-              {/* <p className="mb-4"><strong>First Name:</strong> {formData.first_name}</p>
-              <p className="mb-4"><strong>Last Name:</strong> {formData.last_name}</p> */}
-              <p className="mb-4"><strong>Nickname:</strong> {formData.nickname}</p>
-              <p className="mb-4"><strong>Birth Date:</strong> {formData.birth_date}</p>
-              <p className="mb-4"><strong>Gender:</strong> {formData.gender}</p>
-              <p className="mb-6"><strong>Location:</strong> {formData.city}, {formData.region}, {formData.country}</p>
-              <div className="flex justify-between">
-                <button onClick={handleBack} className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600">Back</button>
-                <button onClick={handleSubmit} className="bg-green-500 text-white p-2 rounded-lg w-24 hover:bg-green-600">Submit</button>
+              <h2 className="text-2xl font-bold mb-6 text-[#0ABAB5]">Profile Summary</h2>
+              <div className="space-y-2">
+                <p><strong>Nickname:</strong> {formData.nickname}</p>
+                <p><strong>Birth Date:</strong> {new Date(formData.birth_date).toLocaleDateString()}</p>
+                <p><strong>Gender:</strong> {formData.gender}</p>
+                <p><strong>Location:</strong> {[formData.city, formData.region, formData.country].filter(Boolean).join(", ")}</p>
+              </div>
+              
+              <div className="flex justify-between mt-8">
+                <button 
+                  onClick={handleBack} 
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                >
+                  Back
+                </button>
+                <button 
+                  onClick={handleSubmit} 
+                  className="bg-green-500 text-white p-2 rounded-lg w-24 hover:bg-green-600"
+                >
+                  Submit
+                </button>
               </div>
             </div>
           )}

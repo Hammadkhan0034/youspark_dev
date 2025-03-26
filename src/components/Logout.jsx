@@ -1,5 +1,7 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { LogOut } from "lucide-react";
 import { logoutUser } from "../redux/userSlice";
 
 const Logout = () => {
@@ -7,19 +9,24 @@ const Logout = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // Use the logoutUser action to clear everything
+    // Clear local storage
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    
+    // Dispatch logout action
     dispatch(logoutUser());
     
-    // Redirect to login page
-    navigate("/signin-socials");
+    // Navigate to login page
+    navigate('/signin-socials');
   };
 
   return (
-    <button
+    <button 
       onClick={handleLogout}
-      className="text-red-500 hover:text-red-700"
+      className="p-2 hover:bg-teal-light/10 rounded-full transition-colors"
+      title="Logout"
     >
-      Logout
+      <LogOut className="text-teal-dark" size={24} />
     </button>
   );
 };

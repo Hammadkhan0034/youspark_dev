@@ -14,7 +14,7 @@ export default function LineCallback() {
         new URLSearchParams({
           grant_type: "authorization_code",
           code: code,
-          redirect_uri: "http://localhost:3000/auth/line/callback", // No trailing slash
+          redirect_uri: "http://34.236.113.112/auth/line/callback", // No trailing slash
           client_id: import.meta.env.VITE_LINE_CHANNEL_ID, // Access environment variable
           client_secret: import.meta.env.VITE_LINE_CHANNEL_SECRET, // Access environment variable
         }),
