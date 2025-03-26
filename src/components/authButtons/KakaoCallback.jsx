@@ -51,24 +51,40 @@ export default function KakaoCallback() {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Create and store user profile
+        // Create and store user profile with all required fields
         const userProfile = {
           id: data.id || '',
           email: data.email || '',
           username: data.user_name || '',
+          nickname: data.nickname || '',
+          birth_date: data.birth_date || '',
+          gender: data.gender || '',
+          country: data.country || '',
+          region: data.region || '',
+          city: data.city || '',
           userStatus: data.user_status || '',
           userImage: data.user_image || '',
           firstLogin: data.first_login || false,
           appName: data.app_name || '',
-          profile_completed: data.profile_completed || false // Use the actual profile_completed status
+          // Don't trust the backend's profile_completed flag
+          profile_completed: false
         };
+
+        // Check if required fields are filled
+        const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+        const isProfileComplete = requiredFields.every(field => 
+          userProfile[field] && userProfile[field].trim() !== ''
+        );
+
+        // Update profile_completed based on actual field values
+        userProfile.profile_completed = isProfileComplete;
 
         // Store in localStorage and Redux
         localStorage.setItem("user_profile", JSON.stringify(userProfile));
         dispatch(setUser(userProfile));
 
-        // Check if profile is incomplete or if it's first login
-        if (data.first_login || !userProfile.profile_completed || !userProfile.username) {
+        // Always redirect to profile page if required fields are missing
+        if (!isProfileComplete) {
           navigate("/user-profile", { replace: true });
         } else {
           navigate("/home", { replace: true });
