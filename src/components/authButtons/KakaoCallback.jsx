@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import API from "../../api/api";
-import { AUTH_CALLBACKS } from "../../config/urls/urls";
 import axios from "axios";
+import { AUTH_CALLBACKS } from "../../config/urls/urls";
 
 export default function KakaoCallback() {
   const navigate = useNavigate();
@@ -12,17 +12,15 @@ export default function KakaoCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get("code");
+
+      if (!code) {
+        navigate("/signin-socials");
+        return;
+      }
+
       try {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get("code");
-        const receivedState = params.get("state");
-        const storedState = localStorage.getItem("kakao_auth_state");
-
-        // Validate state to prevent CSRF attacks
-        if (!storedState || receivedState !== storedState) {
-          throw new Error("State mismatch - possible CSRF attack");
-        }
-
         // Exchange the code for a Kakao access token
         const kakaoTokenResponse = await axios.post(
           "https://kauth.kakao.com/oauth/token",
@@ -55,25 +53,34 @@ export default function KakaoCallback() {
 
         // Create and store user profile
         const userProfile = {
-          id: data.id,
-          email: data.email,
-          username: data.user_name,
-          userStatus: data.user_status,
-          userImage: data.user_image,
-          firstLogin: data.first_login,
-          appName: data.app_name,
-          profile_completed: !data.first_login // Set to true if not first login
+          id: data.id || '',
+          email: data.email || '',
+          username: data.user_name || '',
+          userStatus: data.user_status || '',
+          userImage: data.user_image || '',
+          firstLogin: data.first_login || false,
+          appName: data.app_name || '',
+          profile_completed: data.profile_completed || false // Use the actual profile_completed status
         };
 
         // Store in localStorage and Redux
         localStorage.setItem("user_profile", JSON.stringify(userProfile));
         dispatch(setUser(userProfile));
 
-        // Navigate based on profile completion
-        navigate(userProfile.profile_completed ? "/home" : "/user-profile");
+        // Check if profile is incomplete or if it's first login
+        if (data.first_login || !userProfile.profile_completed || !userProfile.username) {
+          navigate("/user-profile", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
+
       } catch (error) {
         console.error("Kakao authentication error:", error);
-        navigate("/signin-socials");
+        // Clear any potentially corrupted data
+        localStorage.removeItem("user_profile");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/signin-socials", { replace: true });
       }
     };
 

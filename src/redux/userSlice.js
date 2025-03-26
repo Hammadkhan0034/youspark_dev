@@ -35,10 +35,21 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+const getUserFromLocalStorage = () => {
+  try {
+    const storedProfile = localStorage.getItem("user_profile");
+    return storedProfile ? JSON.parse(storedProfile) : null;
+  } catch (error) {
+    console.error("Error parsing user profile from localStorage:", error);
+    localStorage.removeItem("user_profile"); // Clear invalid data
+    return null;
+  }
+};
+
 // Initial state with clear structure
 const initialState = {
-  user: null,
-  isAuthenticated: false,
+  user: getUserFromLocalStorage(),
+  isAuthenticated: !!localStorage.getItem("access_token"),
   loading: false,
   error: null,
   profileUpdateStatus: 'idle' // 'idle' | 'loading' | 'succeeded' | 'failed'
