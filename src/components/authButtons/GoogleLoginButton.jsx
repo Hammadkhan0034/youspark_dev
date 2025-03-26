@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/urls/urls";
 
 const GoogleLoginButton = () => {
   const dispatch = useDispatch();
@@ -13,7 +14,7 @@ const GoogleLoginButton = () => {
     onSuccess: async (response) => {
       try {
         const res = await axios.post(
-          "http://54.167.153.121:4000/api/social-sign-in",
+          `${API_BASE_URL}/social-sign-in`,
           {
             access_token: response.access_token,
             channel: "google",
@@ -27,17 +28,50 @@ const GoogleLoginButton = () => {
 
         const { data } = res.data;
         
-        // Store access token
+        // Store tokens
         localStorage.setItem("access_token", data.access_token);
         if (data.refresh_token) {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Store user data in Redux
-        dispatch(setUser(data.user));
+        // Create and store user profile with all required fields
+        const userProfile = {
+          id: data.id || '',
+          email: data.email || '',
+          username: data.user_name || '',
+          nickname: data.nickname || '',
+          birth_date: data.birth_date || '',
+          gender: data.gender || '',
+          country: data.country || '',
+          region: data.region || '',
+          city: data.city || '',
+          userStatus: data.user_status || '',
+          userImage: data.user_image || '',
+          firstLogin: data.first_login || false,
+          appName: data.app_name || '',
+          // Don't trust the backend's profile_completed flag
+          profile_completed: false
+        };
 
-        // Always navigate to profile page first
-        navigate("/user-profile");
+        // Check if required fields are filled
+        const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+        const isProfileComplete = requiredFields.every(field => 
+          userProfile[field] && userProfile[field].trim() !== ''
+        );
+
+        // Update profile_completed based on actual field values
+        userProfile.profile_completed = isProfileComplete;
+
+        // Store in localStorage and Redux
+        localStorage.setItem("user_profile", JSON.stringify(userProfile));
+        dispatch(setUser(userProfile));
+
+        // Always redirect to profile page if required fields are missing
+        if (!isProfileComplete) {
+          navigate("/user-profile", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
         
       } catch (error) {
         console.error("Error during Google authentication:", error);
