@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../api/api";
 
 const isProfileComplete = (profile) => {
-  const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+  const requiredFields = [ 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
   return requiredFields.every(field => profile[field] && profile[field].trim() !== '');
 };
 

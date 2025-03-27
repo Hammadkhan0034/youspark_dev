@@ -3,7 +3,9 @@ import { FcGoogle } from "react-icons/fc";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+import API from "../../api/api";
+
 import { API_BASE_URL } from "../../config/urls/urls";
 
 const GoogleLoginButton = () => {
@@ -11,12 +13,11 @@ const GoogleLoginButton = () => {
   const navigate = useNavigate();
 
   const login = useGoogleLogin({
-    onSuccess: async (response) => {
+    onSuccess: async (googleResponse) => {
       try {
-        const res = await axios.post(
-          `${API_BASE_URL}/social-sign-in`,
+        const response = await API.post("/social-sign-in", 
           {
-            access_token: response.access_token,
+            access_token: googleResponse.access_token,
             channel: "google",
           },
           {
@@ -26,7 +27,7 @@ const GoogleLoginButton = () => {
           }
         );
 
-        const { data } = res.data;
+        const { data } = response.data;
         
         // Store tokens
         localStorage.setItem("access_token", data.access_token);
@@ -34,39 +35,33 @@ const GoogleLoginButton = () => {
           localStorage.setItem("refresh_token", data.refresh_token);
         }
 
-        // Create and store user profile with all required fields
         const userProfile = {
-          id: data.id || '',
-          email: data.email || '',
-          username: data.user_name || '',
           nickname: data.nickname || '',
           birth_date: data.birth_date || '',
           gender: data.gender || '',
           country: data.country || '',
           region: data.region || '',
           city: data.city || '',
-          userStatus: data.user_status || '',
-          userImage: data.user_image || '',
-          firstLogin: data.first_login || false,
-          appName: data.app_name || '',
           // Don't trust the backend's profile_completed flag
           profile_completed: false
         };
 
+        // Store user profile as JSON string
+        localStorage.setItem("user_profile", JSON.stringify(userProfile));
+
+        // Update Redux store
+        dispatch(setUser(userProfile));
+
+        // Clear the hash from URL
+        window.history.replaceState(null, null, window.location.pathname);
+
         // Check if required fields are filled
-        const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+        const requiredFields = ['username','nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
         const isProfileComplete = requiredFields.every(field => 
           userProfile[field] && userProfile[field].trim() !== ''
         );
 
-        // Update profile_completed based on actual field values
-        userProfile.profile_completed = isProfileComplete;
-
-        // Store in localStorage and Redux
-        localStorage.setItem("user_profile", JSON.stringify(userProfile));
-        dispatch(setUser(userProfile));
-
-        // Always redirect to profile page if required fields are missing
+        // Always redirect to profile page if any required field is missing
         if (!isProfileComplete) {
           navigate("/user-profile", { replace: true });
         } else {
@@ -75,11 +70,17 @@ const GoogleLoginButton = () => {
         
       } catch (error) {
         console.error("Error during Google authentication:", error);
-        // Handle error (show error message to user)
+        // Clear any potentially corrupted data
+        localStorage.removeItem("user_profile");
+        localStorage.removeItem("userProfileFormData");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/signin-socials", { replace: true });
       }
     },
     onError: (error) => {
       console.error("Google Login Error:", error);
+      navigate("/signin-socials", { replace: true });
     },
   });
 

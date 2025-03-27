@@ -13,9 +13,9 @@ const Logout = () => {
     const itemsToClear = [
       'access_token',
       'refresh_token',
-      'user_profile',
-      'userProfileFormData',
-      'multiStepFormData'
+      // 'user_profile',
+      // 'userProfileFormData',
+      // 'multiStepFormData'
     ];
 
     itemsToClear.forEach(item => {

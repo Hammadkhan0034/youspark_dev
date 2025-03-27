@@ -53,20 +53,12 @@ export default function KakaoCallback() {
 
         // Create and store user profile with all required fields
         const userProfile = {
-          id: data.id || '',
-          email: data.email || '',
-          username: data.user_name || '',
           nickname: data.nickname || '',
           birth_date: data.birth_date || '',
           gender: data.gender || '',
           country: data.country || '',
           region: data.region || '',
           city: data.city || '',
-          userStatus: data.user_status || '',
-          userImage: data.user_image || '',
-          firstLogin: data.first_login || false,
-          appName: data.app_name || '',
-          // Don't trust the backend's profile_completed flag
           profile_completed: false
         };
 

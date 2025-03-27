@@ -19,7 +19,6 @@ const MultiStepForm = () => {
     country: "",
     region: "",
     city: "",
-    
   });
 
   const [errors, setErrors] = useState({});
@@ -27,6 +26,7 @@ const MultiStepForm = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [cities, setCities] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load data from local storage when component mounts
   useEffect(() => {
@@ -168,6 +168,7 @@ const MultiStepForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
+    setIsSubmitting(true); // Start loading
 
     try {
       const token = localStorage.getItem("access_token");
@@ -181,6 +182,7 @@ const MultiStepForm = () => {
       if (locationError) {
         setErrors({ location: locationError });
         setStep(4);
+        setIsSubmitting(false); // Stop loading on validation error
         return;
       }
 
@@ -203,14 +205,17 @@ const MultiStepForm = () => {
         // Clear form data from local storage
         localStorage.removeItem("userProfileFormData");
         
-        // Navigate to home
-        navigate("/home", { replace: true });
+        // Navigate to home after a short delay
+        setTimeout(() => {
+          navigate("/home", { replace: true });
+        }, 1000);
       }
     } catch (error) {
       console.error("Profile update failed:", error);
       setSubmitError(
         error.message || "Failed to update profile. Please try again."
       );
+      setIsSubmitting(false); // Stop loading on error
     }
   };
 
@@ -371,16 +376,22 @@ const MultiStepForm = () => {
               
               <div className="flex justify-between mt-6">
                 <button 
-                  onClick={handleBack} 
-                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600"
+                  onClick={handleBack}
+                  disabled={isSubmitting}
+                  className="bg-gray-500 text-white p-2 rounded-lg w-24 hover:bg-gray-600 disabled:opacity-50"
                 >
                   Back
                 </button>
                 <button 
-                  onClick={handleNext} 
-                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="bg-[#0ABAB5] text-white p-2 rounded-lg w-24 hover:bg-[#81D8D0] transition disabled:opacity-50 flex items-center justify-center"
                 >
-                  Next
+                  {isSubmitting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    'Submit'
+                  )}
                 </button>
               </div>
             </div>

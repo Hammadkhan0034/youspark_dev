@@ -35,19 +35,12 @@ export default function DiscordCallback() {
 
             // Create a properly structured user profile object
             const userProfile = {
-              id: data.id || '',
-              email: data.email || '',
-              username: data.user_name || '',
               nickname: data.nickname || '',
               birth_date: data.birth_date || '',
               gender: data.gender || '',
               country: data.country || '',
               region: data.region || '',
               city: data.city || '',
-              userStatus: data.user_status || '',
-              firstLogin: data.first_login || false,
-              appName: data.app_name || '',
-              // Don't trust the backend's profile_completed flag
               profile_completed: false
             };
 
