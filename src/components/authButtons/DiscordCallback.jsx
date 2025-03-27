@@ -41,7 +41,6 @@ export default function DiscordCallback() {
               country: data.country || '',
               region: data.region || '',
               city: data.city || '',
-              profile_completed: false
             };
 
             // Store user profile as JSON string
@@ -54,7 +53,7 @@ export default function DiscordCallback() {
             window.history.replaceState(null, null, window.location.pathname);
 
             // Check if required fields are filled
-            const requiredFields = ['username', 'nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
+            const requiredFields = ['nickname', 'birth_date', 'gender', 'country', 'region', 'city'];
             const isProfileComplete = requiredFields.every(field => 
               userProfile[field] && userProfile[field].trim() !== ''
             );
